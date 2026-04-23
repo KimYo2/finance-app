@@ -50,6 +50,11 @@ App menggunakan abstract interface `DbInterface` yang bisa switch antara:
 1. **SQLite** (default) - Offline, data tersimpan lokal di device
 2. **PocketBase** - Online, data sync ke server
 
+> **Mengapa SQLite dulu?**
+> PocketBase membutuhkan server terpisah yang harus di-deploy & di-configure manual.
+> Belum ada backend server yang aktif, jadi untuk saat ini menggunakan SQLite saja.
+> Nanti bisa di-switch ke PocketBase kalau udah ada server yang tersedia.
+
 ```dart
 // Switch ke PocketBase (online)
 import 'database/pb_helper.dart';
