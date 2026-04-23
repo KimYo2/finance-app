@@ -1,0 +1,164 @@
+[
+  {
+    "id": "ln7y8mk5vdiryq",
+    "name": "transactions",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "system": false,
+        "id": "title",
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 100
+        }
+      },
+      {
+        "system": false,
+        "id": "amount",
+        "name": "amount",
+        "type": "number",
+        "required": true,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": null
+        }
+      },
+      {
+        "system": false,
+        "id": "type",
+        "name": "type",
+        "type": "select",
+        "required": true,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": ["income", "expense"]
+        }
+      },
+      {
+        "system": false,
+        "id": "category",
+        "name": "category",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 50
+        }
+      },
+      {
+        "system": false,
+        "id": "date",
+        "name": "date",
+        "type": "date",
+        "required": true,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "note",
+        "name": "note",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 500
+        }
+      }
+    ],
+    "indexes": [
+      "CREATE INDEX idx_transactions_date ON transactions (date)",
+      "CREATE INDEX idx_transactions_type ON transactions (type)"
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "id": "ln7y8mk5vdiryq2",
+    "name": "categories",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "system": false,
+        "id": "name",
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 50
+        }
+      },
+      {
+        "system": false,
+        "id": "type",
+        "name": "type",
+        "type": "select",
+        "required": true,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": ["income", "expense"]
+        }
+      },
+      {
+        "system": false,
+        "id": "icon",
+        "name": "icon",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 30
+        }
+      },
+      {
+        "system": false,
+        "id": "color",
+        "name": "color",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 10
+        }
+      },
+      {
+        "system": false,
+        "id": "is_default",
+        "name": "is_default",
+        "type": "bool",
+        "required": true,
+        "unique": false,
+        "options": {}
+      }
+    ],
+    "indexes": [
+      "CREATE INDEX idx_categories_type ON categories (type)"
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  }
+]

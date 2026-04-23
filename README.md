@@ -14,7 +14,7 @@ Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flu
 
 - Flutter SDK ^3.11.4
 - Provider (state management)
-- sqflite (local database)
+- PocketBase (backend)
 - fl_chart (charts)
 - intl (formatting mata uang Indonesia)
 
@@ -24,7 +24,7 @@ Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flu
 lib/
 ├── main.dart                  # Entry point & routing
 ├── database/
-│   └── db_helper.dart        # SQLite helper
+│   └── pb_helper.dart        # PocketBase helper
 ├── models/
 │   └── transaction_model.dart
 ├── providers/
@@ -40,7 +40,48 @@ lib/
     └── platform_helper.dart
 ```
 
-## Instalasi
+## Setup PocketBase
+
+### 1. Download & Run PocketBase
+
+```bash
+# Download dari https://pocketbase.io/docs/
+chmod +x pocketbase
+./pocketbase serve
+# Admin UI: http://127.0.0.1:8090/_/
+```
+
+### 2. Cara 1 — Auto Migration (Recommended)
+
+```bash
+# Copy folder pb_migrations/ ke direktori PocketBase
+cp -r pb_migrations/ /path/to/pocketbase/
+./pocketbase migrate up
+```
+
+### 3. Cara 2 — Import via Admin UI
+
+1. Buka http://127.0.0.1:8090/_/
+2. Settings → Import Collections
+3. Upload file `pb_schema.json`
+4. Klik "Confirm and import"
+
+### 4. Update Flutter App
+
+Edit file `.env` di root project Flutter:
+
+```
+PB_URL=http://127.0.0.1:8090
+```
+
+Ganti IP jika PocketBase di server/hosting berbeda.
+
+### 5. Verify Setup
+
+Buka: http://127.0.0.1:8090/_/
+Pastikan collections `transactions` dan `categories` sudah muncul.
+
+## Instalasi Flutter
 
 ```bash
 # Clone repo
@@ -70,6 +111,7 @@ flutter build ios --release
 
 - Android: API 21+ (Android 5.0)
 - iOS: 13.0+
+- PocketBase: v0.21+
 
 ## Lisensi
 
