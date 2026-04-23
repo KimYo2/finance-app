@@ -3,39 +3,81 @@
     "name": "transactions",
     "type": "base",
     "schema": [
-      {
-        "name": "title",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "amount",
-        "type": "number",
-        "required": true
-      },
-      {
-        "name": "type",
-        "type": "select",
-        "required": true,
-        "options": {
-          "maxSelect": 1,
-          "values": ["income", "expense"]
-        }
-      },
-      {
-        "name": "category",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "date",
-        "type": "date",
-        "required": true
-      },
-      {
-        "name": "note",
-        "type": "text"
-      }
+      {"name": "title", "type": "text", "required": true},
+      {"name": "amount", "type": "number", "required": true},
+      {"name": "type", "type": "select", "required": true, "options": {"maxSelect": 1, "values": ["income", "expense"]}},
+      {"name": "category", "type": "text", "required": true},
+      {"name": "date", "type": "date", "required": true},
+      {"name": "note", "type": "text"}
+    ],
+    "listRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "name": "categories",
+    "type": "base",
+    "schema": [
+      {"name": "name", "type": "text", "required": true},
+      {"name": "type", "type": "select", "required": true, "options": {"maxSelect": 1, "values": ["income", "expense"]}},
+      {"name": "icon", "type": "text"},
+      {"name": "color", "type": "text"},
+      {"name": "is_default", "type": "bool"}
+    ],
+    "listRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "name": "assets",
+    "type": "base",
+    "schema": [
+      {"name": "name", "type": "text", "required": true},
+      {"name": "type", "type": "select", "required": true, "options": {"maxSelect": 1, "values": ["cash", "bank", "investment", "property", "vehicle", "electronics", "other"]}},
+      {"name": "amount", "type": "number", "required": true},
+      {"name": "currency", "type": "text"},
+      {"name": "purchase_date", "type": "date"},
+      {"name": "note", "type": "text"},
+      {"name": "is_active", "type": "bool"}
+    ],
+    "listRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "name": "debts",
+    "type": "base",
+    "schema": [
+      {"name": "title", "type": "text", "required": true},
+      {"name": "type", "type": "select", "required": true, "options": {"maxSelect": 1, "values": ["hutang", "piutang"]}},
+      {"name": "amount", "type": "number", "required": true},
+      {"name": "remaining_amount", "type": "number"},
+      {"name": "person_name", "type": "text"},
+      {"name": "due_date", "type": "date"},
+      {"name": "start_date", "type": "date"},
+      {"name": "is_paid", "type": "bool"},
+      {"name": "note", "type": "text"}
+    ],
+    "listRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "name": "budgets",
+    "type": "base",
+    "schema": [
+      {"name": "name", "type": "text", "required": true},
+      {"name": "amount", "type": "number", "required": true},
+      {"name": "spent", "type": "number"},
+      {"name": "category", "type": "text"},
+      {"name": "month", "type": "number", "required": true},
+      {"name": "year", "type": "number", "required": true},
+      {"name": "note", "type": "text"},
+      {"name": "is_active", "type": "bool"}
     ],
     "listRule": "",
     "createRule": "",

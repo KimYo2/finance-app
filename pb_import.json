@@ -16,5 +16,82 @@
     "createRule": "",
     "updateRule": "",
     "deleteRule": ""
+  },
+  {
+    "id": "categories_collection",
+    "name": "categories",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {"id": "c1", "name": "name", "type": "text", "required": true},
+      {"id": "c2", "name": "type", "type": "select", "required": true, "options": {"maxSelect": 1, "values": ["income", "expense"]}},
+      {"id": "c3", "name": "icon", "type": "text", "required": false},
+      {"id": "c4", "name": "color", "type": "text", "required": false},
+      {"id": "c5", "name": "is_default", "type": "bool", "required": false}
+    ],
+    "listRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "id": "assets_collection",
+    "name": "assets",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {"id": "a1", "name": "name", "type": "text", "required": true},
+      {"id": "a2", "name": "type", "type": "select", "required": true, "options": {"maxSelect": 1, "values": ["cash", "bank", "investment", "property", "vehicle", "electronics", "other"]}},
+      {"id": "a3", "name": "amount", "type": "number", "required": true},
+      {"id": "a4", "name": "currency", "type": "text", "required": false},
+      {"id": "a5", "name": "purchase_date", "type": "date", "required": false},
+      {"id": "a6", "name": "note", "type": "text", "required": false},
+      {"id": "a7", "name": "is_active", "type": "bool", "required": false}
+    ],
+    "listRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "id": "debts_collection",
+    "name": "debts",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {"id": "d1", "name": "title", "type": "text", "required": true},
+      {"id": "d2", "name": "type", "type": "select", "required": true, "options": {"maxSelect": 1, "values": ["hutang", "piutang"]}},
+      {"id": "d3", "name": "amount", "type": "number", "required": true},
+      {"id": "d4", "name": "remaining_amount", "type": "number", "required": false},
+      {"id": "d5", "name": "person_name", "type": "text", "required": false},
+      {"id": "d6", "name": "due_date", "type": "date", "required": false},
+      {"id": "d7", "name": "start_date", "type": "date", "required": false},
+      {"id": "d8", "name": "is_paid", "type": "bool", "required": false},
+      {"id": "d9", "name": "note", "type": "text", "required": false}
+    ],
+    "listRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "id": "budgets_collection",
+    "name": "budgets",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {"id": "b1", "name": "name", "type": "text", "required": true},
+      {"id": "b2", "name": "amount", "type": "number", "required": true},
+      {"id": "b3", "name": "spent", "type": "number", "required": false},
+      {"id": "b4", "name": "category", "type": "text", "required": false},
+      {"id": "b5", "name": "month", "type": "number", "required": true},
+      {"id": "b6", "name": "year", "type": "number", "required": true},
+      {"id": "b7", "name": "note", "type": "text", "required": false},
+      {"id": "b8", "name": "is_active", "type": "bool", "required": false}
+    ],
+    "listRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
   }
 ]
