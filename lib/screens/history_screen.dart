@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
+import '../screens/add_transaction_screen.dart';
 import '../widgets/transaction_card.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -141,7 +142,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       ),
       onDismissed: (_) => _deleteTransaction(transaction, provider),
-      child: TransactionCard(transaction: transaction),
+      child: Stack(
+        children: [
+          TransactionCard(
+            transaction: transaction,
+            onTap: () => _navigateToEdit(transaction),
+          ),
+          Positioned(
+            right: 8,
+            top: 8,
+            child: IconButton(
+              icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.grey),
+              onPressed: () => _navigateToEdit(transaction),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -160,7 +176,32 @@ class _HistoryScreenState extends State<HistoryScreen> {
       ),
       confirmDismiss: (_) => _confirmDeleteIOS(transaction),
       onDismissed: (_) => _deleteTransaction(transaction, provider),
-      child: TransactionCard(transaction: transaction),
+      child: CupertinoContextMenu(
+        actions: [
+          CupertinoContextMenuAction(
+            onPressed: () {
+              Navigator.pop(context);
+              _navigateToEdit(transaction);
+            },
+            trailingIcon: CupertinoIcons.pencil,
+            child: const Text('Edit'),
+          ),
+          CupertinoContextMenuAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _confirmDeleteIOS(transaction).then((confirmed) {
+                if (confirmed) {
+                  _deleteTransaction(transaction, provider);
+                }
+              });
+            },
+            trailingIcon: CupertinoIcons.delete,
+            child: const Text('Hapus'),
+          ),
+        ],
+        child: TransactionCard(transaction: transaction),
+      ),
     );
   }
 
@@ -253,6 +294,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         );
       }
+    }
+  }
+
+  void _navigateToEdit(TransactionModel transaction) {
+    if (Platform.isIOS) {
+      Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (_) => AddTransactionScreen(
+            existingTransaction: transaction,
+          ),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AddTransactionScreen(
+            existingTransaction: transaction,
+          ),
+        ),
+      );
     }
   }
 }

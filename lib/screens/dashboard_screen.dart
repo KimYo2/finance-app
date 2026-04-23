@@ -3,7 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
+import '../screens/add_transaction_screen.dart';
 import '../widgets/transaction_card.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -178,6 +180,7 @@ class DashboardScreen extends StatelessWidget {
                           provider.getRecentTransactions(5);
                       return TransactionCard(
                         transaction: transactions[index],
+                        onTap: () => _navigateToEdit(context, transactions[index]),
                       );
                     },
                   ),
@@ -262,5 +265,27 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _navigateToEdit(BuildContext context, TransactionModel transaction) {
+    if (Platform.isIOS) {
+      Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (_) => AddTransactionScreen(
+            existingTransaction: transaction,
+          ),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AddTransactionScreen(
+            existingTransaction: transaction,
+          ),
+        ),
+      );
+    }
   }
 }

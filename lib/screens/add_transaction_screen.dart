@@ -6,7 +6,12 @@ import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
 
 class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+  final TransactionModel? existingTransaction;
+
+  const AddTransactionScreen({
+    super.key,
+    this.existingTransaction,
+  });
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
@@ -38,10 +43,27 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     'Gaji',
     'Bonus',
     'Usaha',
-    'investasi',
+    'Investasi',
     'Hadiah',
     'Lainnya',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existingTransaction;
+    if (existing != null) {
+      _amountController.text = existing.amount.toStringAsFixed(0);
+      _noteController.text = existing.note;
+      _transactionType = existing.type;
+      _selectedCategory = existing.category;
+      _selectedDate = existing.date;
+    }
+  }
+
+  bool get _isEditMode => widget.existingTransaction != null;
+
+  String get _screenTitle => _isEditMode ? 'Edit Transaksi' : 'Tambah Transaksi';
 
   @override
   void dispose() {
@@ -68,7 +90,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget _buildAndroid() {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Transaksi'),
+        title: Text(_screenTitle),
         centerTitle: true,
       ),
       body: _buildForm(),
@@ -78,7 +100,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget _buildIOS() {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Tambah Transaksi'),
+        middle: Text(_screenTitle),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => Navigator.pop(context),
@@ -446,6 +468,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     final amount = double.tryParse(_amountController.text) ?? 0;
     final transaction = TransactionModel(
+      id: _isEditMode ? widget.existingTransaction?.id : null,
       title: _selectedCategory,
       amount: amount,
       type: _transactionType,
@@ -455,13 +478,32 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
 
     final provider = context.read<TransactionProvider>();
-    final success = await provider.addTransaction(transaction);
+    bool success;
+    if (_isEditMode) {
+      success = await provider.updateTransaction(transaction);
+    } else {
+      success = await provider.addTransaction(transaction);
+    }
 
     setState(() {
       _isLoading = false;
     });
 
     if (success && mounted) {
+      if (Platform.isIOS) {
+        _showAlertIOS(
+          'Berhasil',
+          _isEditMode ? 'Transaksi berhasil diperbarui' : 'Transaksi berhasil ditambahkan',
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_isEditMode
+                ? 'Transaksi berhasil diperbarui'
+                : 'Transaksi berhasil ditambahkan'),
+          ),
+        );
+      }
       Navigator.pop(context);
     }
   }
