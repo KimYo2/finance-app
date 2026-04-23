@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
 import '../screens/add_transaction_screen.dart';
+import '../screens/history_screen.dart';
 import '../widgets/transaction_card.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -26,6 +27,8 @@ class DashboardScreen extends StatelessWidget {
         final expense = provider.monthlyExpense;
 
         final isIOS = Platform.isIOS;
+        final monthFormat = DateFormat('MMMM', 'id_ID');
+        final currentMonth = monthFormat.format(DateTime.now());
 
         Widget body = RefreshIndicator(
           onRefresh: () => provider.loadTransactions(),
@@ -35,8 +38,7 @@ class DashboardScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (!provider.isOnline)
-                  _buildOfflineBanner(isIOS),
+                if (!provider.isOnline) _buildOfflineBanner(isIOS),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
@@ -50,23 +52,49 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
                     children: [
-                      Text(
-                        'Saldo',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          fontSize: 16,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Saldo',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            currencyFormat.format(balance),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        currencyFormat.format(balance),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              currentMonth,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Icon(
+                              isIOS ? CupertinoIcons.money_dollar_circle_fill : Icons.account_balance_wallet,
+                              color: Colors.white.withValues(alpha: 0.5),
+                              size: 28,
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -82,7 +110,7 @@ class DashboardScreen extends StatelessWidget {
                           color: isIOS
                               ? const Color(0xFFE8F5E9)
                               : Colors.green.shade50,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,7 +126,7 @@ class DashboardScreen extends StatelessWidget {
                               'Pemasukan',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey,
+                                color: Color(0xFF757575),
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -122,7 +150,7 @@ class DashboardScreen extends StatelessWidget {
                           color: isIOS
                               ? const Color(0xFFFFEBEE)
                               : Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,7 +166,7 @@ class DashboardScreen extends StatelessWidget {
                               'Pengeluaran',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey,
+                                color: Color(0xFF757575),
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -157,27 +185,66 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  'Transaksi Terbaru',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Transaksi Terbaru',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (isIOS) {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (_) => const HistoryScreen(),
+                            ),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const HistoryScreen(),
+                            ),
+                          );
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            'Lihat Semua',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isIOS ? CupertinoColors.activeBlue : const Color(0xFF4CAF50),
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 12,
+                            color: isIOS ? CupertinoColors.activeBlue : const Color(0xFF4CAF50),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 if (provider.isLoading)
                   const Center(child: CircularProgressIndicator.adaptive())
                 else if (provider.allTransactions.isEmpty)
-                  _buildEmptyState()
+                  _buildEmptyState(context, isIOS)
                 else
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount:
-                        provider.getRecentTransactions(5).length,
+                    itemCount: provider.getRecentTransactions(5).length,
                     itemBuilder: (context, index) {
-                      final transactions =
-                          provider.getRecentTransactions(5);
+                      final transactions = provider.getRecentTransactions(5);
                       return TransactionCard(
                         transaction: transactions[index],
                         onTap: () => _navigateToEdit(context, transactions[index]),
@@ -191,8 +258,8 @@ class DashboardScreen extends StatelessWidget {
 
         if (isIOS) {
           return CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(
-              middle: const Text('Personal Finance'),
+            navigationBar: const CupertinoNavigationBar(
+              middle: Text('Personal Finance'),
             ),
             child: SafeArea(child: body),
           );
@@ -204,6 +271,20 @@ class DashboardScreen extends StatelessWidget {
             centerTitle: true,
           ),
           body: body,
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                isIOS
+                    ? CupertinoPageRoute(builder: (_) => const AddTransactionScreen())
+                    : MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+              );
+            },
+            backgroundColor: const Color(0xFF4CAF50),
+            foregroundColor: Colors.white,
+            elevation: 4,
+            child: const Icon(Icons.add, size: 28),
+          ),
         );
       },
     );
@@ -234,35 +315,58 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context, bool isIOS) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Platform.isIOS
-                ? CupertinoIcons.doc_text
-                : Icons.receipt_long_outlined,
-            size: 64,
-            color: Colors.grey,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Belum ada transaksi',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isIOS ? CupertinoIcons.doc_text : Icons.receipt_long_outlined,
+              size: 80,
+              color: Colors.grey.shade300,
             ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Tekan + untuk menambah transaksi',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
+            const SizedBox(height: 16),
+            const Text(
+              'Belum ada transaksi',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A1A1A),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            const Text(
+              'Tap + untuk mulai mencatat keuanganmu',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF757575),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  isIOS
+                      ? CupertinoPageRoute(builder: (_) => const AddTransactionScreen())
+                      : MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+                );
+              },
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('Tambah Sekarang'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4CAF50),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -38,7 +38,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
         Widget body = SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 80),
             child: Column(
               children: [
                 _buildMonthSelector(),
@@ -70,6 +70,30 @@ class _ReportScreenState extends State<ReportScreen> {
           body: body,
         );
       },
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 20,
+          decoration: BoxDecoration(
+            color: const Color(0xFF4CAF50),
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A1A1A),
+          ),
+        ),
+      ],
     );
   }
 
@@ -190,7 +214,7 @@ class _ReportScreenState extends State<ReportScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
@@ -202,7 +226,7 @@ class _ReportScreenState extends State<ReportScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF757575)),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -277,10 +301,7 @@ class _ReportScreenState extends State<ReportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Pengeluaran per Kategori',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
+        _buildSectionTitle('Pengeluaran per Kategori'),
         const SizedBox(height: 16),
         SizedBox(
           height: 200,
@@ -363,12 +384,10 @@ class _ReportScreenState extends State<ReportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Pemasukan vs Pengeluaran (6 Bulan Terakhir)',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
+        _buildSectionTitle('Pemasukan vs Pengeluaran (6 Bulan Terakhir)'),
         const SizedBox(height: 16),
-        SizedBox(
+        Container(
+          margin: const EdgeInsets.only(bottom: 32),
           height: 200,
           child: BarChart(
             BarChartData(

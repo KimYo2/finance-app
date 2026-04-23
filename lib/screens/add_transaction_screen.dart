@@ -62,7 +62,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   bool get _isEditMode => widget.existingTransaction != null;
-
   String get _screenTitle => _isEditMode ? 'Edit Transaksi' : 'Tambah Transaksi';
 
   @override
@@ -75,6 +74,25 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   List<String> get _currentCategories =>
       _transactionType == 'expense' ? _expenseCategories : _incomeCategories;
+
+  String _formatNumberWithDot(String text) {
+    final cleanText = text.replaceAll(RegExp(r'[^\d]'), '');
+    if (cleanText.isEmpty) return '';
+    final number = int.tryParse(cleanText) ?? 0;
+    return number.toString().replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+        (Match m) => '${m[1]}.');
+  }
+
+  void _onAmountChanged(String value) {
+    final formatted = _formatNumberWithDot(value);
+    if (value != formatted) {
+      _amountController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,41 +153,153 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   Widget _buildTypeSelector() {
     final isIOS = Platform.isIOS;
+    final isExpense = _transactionType == 'expense';
+    final isIncome = _transactionType == 'income';
 
     if (isIOS) {
-      return CupertinoSlidingSegmentedControl<String>(
-        groupValue: _transactionType,
-        children: const {
-          'expense': Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Text('Pengeluaran'),
-          ),
-          'income': Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Text('Pemasukan'),
-          ),
-        },
-        onValueChanged: (value) {
-          setState(() {
-            _transactionType = value!;
-            _selectedCategory = _currentCategories.first;
-          });
-        },
+      return Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() {
+                  _transactionType = 'expense';
+                  _selectedCategory = _expenseCategories.first;
+                }),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isExpense ? const Color(0xFF4CAF50) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (isExpense)
+                        const Icon(CupertinoIcons.checkmark_alt, color: Colors.white, size: 16),
+                      if (isExpense) const SizedBox(width: 4),
+                      Text(
+                        'Pengeluaran',
+                        style: TextStyle(
+                          color: isExpense ? Colors.white : Colors.grey,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() {
+                  _transactionType = 'income';
+                  _selectedCategory = _incomeCategories.first;
+                }),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isIncome ? const Color(0xFF4CAF50) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (isIncome)
+                        const Icon(CupertinoIcons.checkmark_alt, color: Colors.white, size: 16),
+                      if (isIncome) const SizedBox(width: 4),
+                      Text(
+                        'Pemasukan',
+                        style: TextStyle(
+                          color: isIncome ? Colors.white : Colors.grey,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       );
     }
 
-    return SegmentedButton<String>(
-      segments: const [
-        ButtonSegment(value: 'expense', label: Text('Pengeluaran')),
-        ButtonSegment(value: 'income', label: Text('Pemasukan')),
-      ],
-      selected: {_transactionType},
-      onSelectionChanged: (selection) {
-        setState(() {
-          _transactionType = selection.first;
-          _selectedCategory = _currentCategories.first;
-        });
-      },
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(50),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() {
+                _transactionType = 'expense';
+                _selectedCategory = _expenseCategories.first;
+              }),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isExpense ? const Color(0xFF4CAF50) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isExpense)
+                      const Icon(Icons.check, color: Colors.white, size: 16),
+                    if (isExpense) const SizedBox(width: 4),
+                    Text(
+                      'Pengeluaran',
+                      style: TextStyle(
+                        color: isExpense ? Colors.white : Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() {
+                _transactionType = 'income';
+                _selectedCategory = _incomeCategories.first;
+              }),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isIncome ? const Color(0xFF4CAF50) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isIncome)
+                      const Icon(Icons.check, color: Colors.white, size: 16),
+                    if (isIncome) const SizedBox(width: 4),
+                    Text(
+                      'Pemasukan',
+                      style: TextStyle(
+                        color: isIncome ? Colors.white : Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -179,29 +309,50 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     if (isIOS) {
       return CupertinoTextField(
         controller: _amountController,
-        placeholder: 'Nominal',
+        placeholder: '0',
+        onChanged: _onAmountChanged,
         prefix: const Padding(
           padding: EdgeInsets.only(left: 12),
-          child: Text('Rp '),
+          child: Text('Rp ', style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+        ),
       );
     }
 
     return TextFormField(
       controller: _amountController,
-      decoration: const InputDecoration(
+      onChanged: _onAmountChanged,
+      decoration: InputDecoration(
         labelText: 'Nominal',
         prefixText: 'Rp ',
-        border: OutlineInputBorder(),
+        prefixStyle: const TextStyle(fontWeight: FontWeight.bold),
+        hintText: '0',
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF4CAF50)),
+        ),
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Nominal tidak boleh kosong';
         }
-        if (double.tryParse(value) == null) {
+        final cleanValue = value.replaceAll(RegExp(r'[^\d]'), '');
+        if (double.tryParse(cleanValue) == null) {
           return 'Masukkan angka yang valid';
         }
         return null;
@@ -218,7 +369,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         children: [
           const Text(
             'Kategori',
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(fontSize: 12, color: Color(0xFF757575)),
           ),
           const SizedBox(height: 8),
           GestureDetector(
@@ -226,13 +377,21 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(_selectedCategory),
+                  Icon(
+                    _getCategoryIcon(_selectedCategory),
+                    size: 20,
+                    color: _transactionType == 'expense' ? Colors.red : Colors.green,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(_selectedCategory),
+                  ),
                   const Icon(CupertinoIcons.chevron_down, size: 16),
                 ],
               ),
@@ -244,12 +403,41 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     return DropdownButtonFormField<String>(
       initialValue: _selectedCategory,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         labelText: 'Kategori',
-        border: OutlineInputBorder(),
+        prefixIcon: Icon(
+          _getCategoryIcon(_selectedCategory),
+          color: _transactionType == 'expense' ? Colors.red : Colors.green,
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF4CAF50)),
+        ),
       ),
       items: _currentCategories.map((category) {
-        return DropdownMenuItem(value: category, child: Text(category));
+        return DropdownMenuItem(
+          value: category,
+          child: Row(
+            children: [
+              Icon(
+                _getCategoryIcon(category),
+                size: 18,
+                color: _transactionType == 'expense' ? Colors.red : Colors.green,
+              ),
+              const SizedBox(width: 8),
+              Text(category),
+            ],
+          ),
+        );
       }).toList(),
       onChanged: (value) {
         setState(() {
@@ -304,6 +492,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   Widget _buildDatePicker() {
     final isIOS = Platform.isIOS;
+    final dateStr = '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}';
 
     if (isIOS) {
       return Column(
@@ -311,7 +500,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         children: [
           const Text(
             'Tanggal',
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(fontSize: 12, color: Color(0xFF757575)),
           ),
           const SizedBox(height: 8),
           GestureDetector(
@@ -319,16 +508,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                  ),
-                  const Icon(CupertinoIcons.calendar, size: 16),
+                  const Icon(CupertinoIcons.calendar, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(dateStr)),
+                  const Icon(CupertinoIcons.chevron_down, size: 16),
                 ],
               ),
             ),
@@ -337,26 +526,40 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       );
     }
 
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: const Text('Tanggal'),
-      subtitle: Text(
-        '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+    return InputDecorator(
+      decoration: InputDecoration(
+        labelText: 'Tanggal',
+        prefixIcon: const Icon(Icons.calendar_today, size: 20),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF4CAF50)),
+        ),
       ),
-      trailing: const Icon(Icons.calendar_today),
-      onTap: () async {
-        final date = await showDatePicker(
-          context: context,
-          initialDate: _selectedDate,
-          firstDate: DateTime(2020),
-          lastDate: DateTime.now(),
-        );
-        if (date != null) {
-          setState(() {
-            _selectedDate = date;
-          });
-        }
-      },
+      child: GestureDetector(
+        onTap: () async {
+          final date = await showDatePicker(
+            context: context,
+            initialDate: _selectedDate,
+            firstDate: DateTime(2020),
+            lastDate: DateTime.now(),
+          );
+          if (date != null) {
+            setState(() {
+              _selectedDate = date;
+            });
+          }
+        },
+        child: Text(dateStr),
+      ),
     );
   }
 
@@ -410,14 +613,30 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         placeholder: 'Catatan (opsional)',
         maxLines: 3,
         padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+        ),
       );
     }
 
     return TextFormField(
       controller: _noteController,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         labelText: 'Catatan (opsional)',
-        border: OutlineInputBorder(),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF4CAF50)),
+        ),
       ),
       maxLines: 3,
     );
@@ -425,28 +644,67 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   Widget _buildSubmitButton() {
     final isIOS = Platform.isIOS;
+    final isValid = _amountController.text.isNotEmpty;
 
     if (isIOS) {
-      return CupertinoButton.filled(
+      return CupertinoButton(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        color: isValid ? const Color(0xFF4CAF50) : Colors.grey,
+        borderRadius: BorderRadius.circular(16),
         onPressed: _isLoading ? null : _saveTransaction,
         child: _isLoading
-            ? const CupertinoActivityIndicator()
-            : const Text('Simpan'),
+            ? const CupertinoActivityIndicator(color: Colors.white)
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.save_outlined, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    _isEditMode ? 'Perbarui Transaksi' : 'Simpan Transaksi',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
       );
     }
 
-    return ElevatedButton(
-      onPressed: _isLoading ? null : _saveTransaction,
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.all(16),
+    return SizedBox(
+      height: 56,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : _saveTransaction,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isValid ? const Color(0xFF4CAF50) : Colors.grey,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: _isLoading
+            ? SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator.adaptive(
+                  strokeWidth: 2,
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.save_outlined, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    _isEditMode ? 'Perbarui Transaksi' : 'Simpan Transaksi',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
       ),
-      child: _isLoading
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-            )
-          : const Text('Simpan'),
     );
   }
 
@@ -466,7 +724,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _isLoading = true;
     });
 
-    final amount = double.tryParse(_amountController.text) ?? 0;
+    final cleanAmount = _amountController.text.replaceAll(RegExp(r'[^\d]'), '');
+    final amount = double.tryParse(cleanAmount) ?? 0;
     final transaction = TransactionModel(
       id: _isEditMode ? widget.existingTransaction?.id : null,
       title: _selectedCategory,
@@ -522,5 +781,36 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ],
       ),
     );
+  }
+
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case 'Makanan':
+        return Platform.isIOS ? CupertinoIcons.bag_fill : Icons.restaurant;
+      case 'Transportasi':
+        return Platform.isIOS ? CupertinoIcons.car_fill : Icons.directions_car;
+      case 'Belanja':
+        return Platform.isIOS ? CupertinoIcons.bag : Icons.shopping_bag;
+      case 'Hiburan':
+        return Platform.isIOS ? CupertinoIcons.game_controller_solid : Icons.movie;
+      case 'Kesehatan':
+        return Platform.isIOS ? CupertinoIcons.heart_fill : Icons.local_hospital;
+      case 'Pendidikan':
+        return Platform.isIOS ? CupertinoIcons.book_fill : Icons.school;
+      case 'Tagihan':
+        return Platform.isIOS ? CupertinoIcons.doc_text_fill : Icons.receipt;
+      case 'Gaji':
+        return Platform.isIOS ? CupertinoIcons.money_dollar : Icons.work;
+      case 'Bonus':
+        return Platform.isIOS ? CupertinoIcons.gift_fill : Icons.card_giftcard;
+      case 'Usaha':
+        return Platform.isIOS ? CupertinoIcons.briefcase_fill : Icons.business;
+      case 'Investasi':
+        return Platform.isIOS ? CupertinoIcons.chart_bar_fill : Icons.trending_up;
+      case 'Hadiah':
+        return Platform.isIOS ? CupertinoIcons.gift : Icons.card_giftcard;
+      default:
+        return Platform.isIOS ? CupertinoIcons.ellipsis : Icons.more_horiz;
+    }
   }
 }

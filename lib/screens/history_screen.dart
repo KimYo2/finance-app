@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
@@ -43,6 +44,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       body: Column(
         children: [
           _buildTabBar(),
+          if (_selectedTab == 0 && transactions.isNotEmpty) _buildStatsHeader(transactions),
           Expanded(
             child: transactions.isEmpty ? _buildEmptyState() : _buildList(transactions, provider),
           ),
@@ -56,6 +58,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: Column(
         children: [
           _buildTabBar(),
+          if (_selectedTab == 0 && transactions.isNotEmpty) _buildStatsHeader(transactions),
           Expanded(
             child: transactions.isEmpty ? _buildEmptyState() : _buildList(transactions, provider),
           ),
@@ -68,27 +71,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final isIOS = Platform.isIOS;
 
     if (isIOS) {
-      return CupertinoSlidingSegmentedControl<int>(
-        groupValue: _selectedTab,
-        children: const {
-          0: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text('Semua'),
-          ),
-          1: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text('Pemasukan'),
-          ),
-          2: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text('Pengeluaran'),
-          ),
-        },
-        onValueChanged: (value) {
-          setState(() {
-            _selectedTab = value!;
-          });
-        },
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: CupertinoSlidingSegmentedControl<int>(
+          groupValue: _selectedTab,
+          children: const {
+            0: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text('Semua'),
+            ),
+            1: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text('Pemasukan'),
+            ),
+            2: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text('Pengeluaran'),
+            ),
+          },
+          onValueChanged: (value) {
+            setState(() {
+              _selectedTab = value!;
+            });
+          },
+        ),
       );
     }
 
@@ -110,22 +116,106 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  Widget _buildStatsHeader(List<TransactionModel> transactions) {
+    final now = DateTime.now();
+    final monthTransactions = transactions.where((t) =>
+        t.date.month == now.month && t.date.year == now.year).toList();
+    final count = monthTransactions.length;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8, left: 16, right: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F5E9),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.bar_chart, size: 18, color: Color(0xFF4CAF50)),
+          const SizedBox(width: 8),
+          Text(
+            'Total: $count transaksi bulan ini',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF1A1A1A),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildList(List<TransactionModel> transactions, TransactionProvider provider) {
+    final grouped = _groupByDate(transactions);
     final isIOS = Platform.isIOS;
+    final dateFormat = DateFormat('dd MMM yyyy', 'id_ID');
+    final now = DateTime.now();
+    final yesterday = now.subtract(const Duration(days: 1));
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: transactions.length,
+      itemCount: grouped.length,
       itemBuilder: (context, index) {
-        final transaction = transactions[index];
+        final entry = grouped.entries.toList()[index];
+        final dateKey = entry.key;
+        final items = entry.value;
 
-        if (isIOS) {
-          return _buildIOSListItem(transaction, provider);
+        String dateLabel;
+        if (dateKey == dateFormat.format(now)) {
+          dateLabel = 'Hari ini';
+        } else if (dateKey == dateFormat.format(yesterday)) {
+          dateLabel = 'Kemarin';
+        } else {
+          dateLabel = dateKey;
         }
 
-        return _buildAndroidListItem(transaction, provider);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 16, bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4CAF50),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    dateLabel,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF757575),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ...items.map((t) => isIOS
+                ? _buildIOSListItem(t, provider)
+                : _buildAndroidListItem(t, provider)),
+          ],
+        );
       },
     );
+  }
+
+  Map<String, List<TransactionModel>> _groupByDate(List<TransactionModel> transactions) {
+    final dateFormat = DateFormat('dd MMM yyyy', 'id_ID');
+    final Map<String, List<TransactionModel>> grouped = {};
+
+    for (final t in transactions) {
+      final dateKey = dateFormat.format(t.date);
+      grouped.putIfAbsent(dateKey, () => []).add(t);
+    }
+
+    return grouped;
   }
 
   Widget _buildAndroidListItem(TransactionModel transaction, TransactionProvider provider) {
@@ -133,30 +223,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
       key: Key(transaction.id.toString()),
       direction: DismissDirection.endToStart,
       background: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: Colors.red.shade400,
+          borderRadius: BorderRadius.circular(16),
+        ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        color: Colors.red,
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.delete_outline, color: Colors.white, size: 24),
+            const SizedBox(height: 4),
+            const Text(
+              'Hapus',
+              style: TextStyle(color: Colors.white, fontSize: 11),
+            ),
+          ],
         ),
       ),
       onDismissed: (_) => _deleteTransaction(transaction, provider),
-      child: Stack(
-        children: [
-          TransactionCard(
-            transaction: transaction,
-            onTap: () => _navigateToEdit(transaction),
-          ),
-          Positioned(
-            right: 8,
-            top: 8,
-            child: IconButton(
-              icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.grey),
-              onPressed: () => _navigateToEdit(transaction),
-            ),
-          ),
-        ],
+      child: TransactionCard(
+        transaction: transaction,
+        showEditIcon: true,
+        onTap: () => _navigateToEdit(transaction),
       ),
     );
   }
@@ -166,12 +256,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
       key: Key(transaction.id.toString()),
       direction: DismissDirection.endToStart,
       background: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: Colors.red.shade400,
+          borderRadius: BorderRadius.circular(16),
+        ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        color: Colors.red,
-        child: const Icon(
-          CupertinoIcons.delete,
-          color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.delete_outline, color: Colors.white, size: 24),
+            const SizedBox(height: 4),
+            const Text(
+              'Hapus',
+              style: TextStyle(color: Colors.white, fontSize: 11),
+            ),
+          ],
         ),
       ),
       confirmDismiss: (_) => _confirmDeleteIOS(transaction),
@@ -200,7 +301,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
             child: const Text('Hapus'),
           ),
         ],
-        child: TransactionCard(transaction: transaction),
+        child: TransactionCard(
+          transaction: transaction,
+          showEditIcon: true,
+          onTap: () => _navigateToEdit(transaction),
+        ),
       ),
     );
   }

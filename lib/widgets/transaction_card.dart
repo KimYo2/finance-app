@@ -7,11 +7,13 @@ import '../models/transaction_model.dart';
 class TransactionCard extends StatelessWidget {
   final TransactionModel transaction;
   final VoidCallback? onTap;
+  final bool showEditIcon;
 
   const TransactionCard({
     super.key,
     required this.transaction,
     this.onTap,
+    this.showEditIcon = false,
   });
 
   @override
@@ -35,28 +37,38 @@ class TransactionCard extends StatelessWidget {
         onTap: onTap,
         child: Container(
           margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: CupertinoColors.systemBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: CupertinoColors.systemGrey5),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFEEEEEE)),
           ),
           child: Row(
             children: [
               Container(
+                width: 4,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: amountColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: isIncome
-                      ? const Color(0xFFE8F5E9)
-                      : const Color(0xFFFFEBEE),
-                  borderRadius: BorderRadius.circular(10),
+                  color: isIncome ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  iconData,
-                  color: amountColor,
-                  size: 20,
-                ),
+                child: Icon(iconData, color: amountColor, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -68,14 +80,15 @@ class TransactionCard extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
+                        color: Color(0xFF1A1A1A),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       dateFormat.format(transaction.date),
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
+                        fontSize: 11,
+                        color: Color(0xFF757575),
                       ),
                     ),
                     if (transaction.note.isNotEmpty) ...[
@@ -83,8 +96,8 @@ class TransactionCard extends StatelessWidget {
                       Text(
                         transaction.note,
                         style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
+                          fontSize: 11,
+                          color: Color(0xFF757575),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -93,13 +106,30 @@ class TransactionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Text(
-                '$amountPrefix${currencyFormat.format(transaction.amount)}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: amountColor,
-                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '$amountPrefix${currencyFormat.format(transaction.amount)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: amountColor,
+                    ),
+                  ),
+                  if (showEditIcon) ...[
+                    const SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: onTap,
+                      child: Icon(
+                        Icons.edit_outlined,
+                        size: 13,
+                        color: Colors.grey.shade400,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
@@ -111,28 +141,40 @@ class TransactionCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFFEEEEEE)),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap ?? () {},
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
             children: [
+              Container(
+                width: 4,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: amountColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
               Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
                   color: isIncome ? Colors.green.shade50 : Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  iconData,
-                  color: amountColor,
-                  size: 20,
-                ),
+                child: Icon(iconData, color: amountColor, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -144,14 +186,15 @@ class TransactionCard extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
+                        color: Color(0xFF1A1A1A),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       dateFormat.format(transaction.date),
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
+                        fontSize: 11,
+                        color: Colors.grey.shade500,
                       ),
                     ),
                     if (transaction.note.isNotEmpty) ...[
@@ -159,8 +202,8 @@ class TransactionCard extends StatelessWidget {
                       Text(
                         transaction.note,
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
+                          fontSize: 11,
+                          color: Colors.grey.shade500,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -169,13 +212,30 @@ class TransactionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Text(
-                '$amountPrefix${currencyFormat.format(transaction.amount)}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: amountColor,
-                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '$amountPrefix${currencyFormat.format(transaction.amount)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: amountColor,
+                    ),
+                  ),
+                  if (showEditIcon) ...[
+                    const SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: onTap,
+                      child: Icon(
+                        Icons.edit_outlined,
+                        size: 13,
+                        color: Colors.grey.shade400,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
