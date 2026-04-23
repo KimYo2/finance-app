@@ -1,155 +1,43 @@
 [
   {
-    "id": "ln7y8mk5vdiryq",
     "name": "transactions",
     "type": "base",
-    "system": false,
     "schema": [
       {
-        "system": false,
-        "id": "title",
         "name": "title",
         "type": "text",
-        "required": true,
-        "unique": false,
-        "options": {
-          "min": null,
-          "max": 100
-        }
+        "required": true
       },
       {
-        "system": false,
-        "id": "amount",
         "name": "amount",
         "type": "number",
-        "required": true,
-        "unique": false,
-        "options": {
-          "min": 0,
-          "max": null
-        }
+        "required": true
       },
       {
-        "system": false,
-        "id": "type",
         "name": "type",
         "type": "select",
         "required": true,
-        "unique": false,
         "options": {
           "maxSelect": 1,
           "values": ["income", "expense"]
         }
       },
       {
-        "system": false,
-        "id": "category",
         "name": "category",
         "type": "text",
-        "required": true,
-        "unique": false,
-        "options": {
-          "min": null,
-          "max": 50
-        }
+        "required": true
       },
       {
-        "system": false,
-        "id": "date",
         "name": "date",
         "type": "date",
-        "required": true,
-        "unique": false,
-        "options": {
-          "min": "",
-          "max": ""
-        }
+        "required": true
       },
       {
-        "system": false,
-        "id": "note",
         "name": "note",
-        "type": "text",
-        "required": false,
-        "unique": false,
-        "options": {
-          "min": null,
-          "max": 500
-        }
+        "type": "text"
       }
     ],
     "listRule": "",
-    "viewRule": "",
-    "createRule": "",
-    "updateRule": "",
-    "deleteRule": ""
-  },
-  {
-    "id": "ln7y8mk5vdiryq2",
-    "name": "categories",
-    "type": "base",
-    "system": false,
-    "schema": [
-      {
-        "system": false,
-        "id": "name",
-        "name": "name",
-        "type": "text",
-        "required": true,
-        "unique": false,
-        "options": {
-          "min": null,
-          "max": 50
-        }
-      },
-      {
-        "system": false,
-        "id": "type",
-        "name": "type",
-        "type": "select",
-        "required": true,
-        "unique": false,
-        "options": {
-          "maxSelect": 1,
-          "values": ["income", "expense"]
-        }
-      },
-      {
-        "system": false,
-        "id": "icon",
-        "name": "icon",
-        "type": "text",
-        "required": false,
-        "unique": false,
-        "options": {
-          "min": null,
-          "max": 30
-        }
-      },
-      {
-        "system": false,
-        "id": "color",
-        "name": "color",
-        "type": "text",
-        "required": false,
-        "unique": false,
-        "options": {
-          "min": null,
-          "max": 10
-        }
-      },
-      {
-        "system": false,
-        "id": "is_default",
-        "name": "is_default",
-        "type": "bool",
-        "required": true,
-        "unique": false,
-        "options": {}
-      }
-    ],
-    "listRule": "",
-    "viewRule": "",
     "createRule": "",
     "updateRule": "",
     "deleteRule": ""

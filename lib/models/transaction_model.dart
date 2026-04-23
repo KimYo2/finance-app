@@ -19,6 +19,8 @@ class TransactionModel {
     required this.note,
   });
 
+  String get safeId => id ?? '';
+
   factory TransactionModel.fromRecord(RecordModel record) {
     return TransactionModel(
       id: record.id,

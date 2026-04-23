@@ -100,7 +100,12 @@ class TransactionProvider extends ChangeNotifier {
     }
 
     try {
-      final updatedTransaction = await _pbHelper.update(transaction.id!, transaction);
+      final transactionId = transaction.safeId;
+      if (transactionId.isEmpty) {
+        _errorMessage = 'Transaction ID is required for update';
+        return false;
+      }
+      final updatedTransaction = await _pbHelper.update(transactionId, transaction);
       final index = _transactions.indexWhere((t) => t.id == transaction.id);
       if (index != -1) {
         _transactions[index] = updatedTransaction;

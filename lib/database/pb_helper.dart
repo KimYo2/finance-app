@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:pocketbase/pocketbase.dart';
 import '../models/transaction_model.dart';
 
@@ -6,6 +7,10 @@ class PbHelper {
   static PbHelper? _instance;
   late PocketBase _pb;
   bool _isInitialized = false;
+
+  static const String defaultUrl = 'http://192.168.18.6:8090';
+  static const String emulatorUrl = 'http://10.0.2.2:8090';
+  static const String localhostUrl = 'http://127.0.0.1:8090';
 
   factory PbHelper() {
     _instance ??= PbHelper._internal();
@@ -15,20 +20,27 @@ class PbHelper {
   PbHelper._internal();
 
   String _getBaseUrl() {
-    if (Platform.isAndroid) {
-      if (Platform.environment.containsKey('ANDROID_EMULATOR')) {
-        return 'http://10.0.2.2:8090';
-      }
-      return 'http://192.168.18.6:8090';
-    } else if (Platform.isIOS) {
-      return 'http://127.0.0.1:8090';
+    if (kIsWeb) {
+      return defaultUrl;
     }
-    return 'http://127.0.0.1:8090';
+
+    if (Platform.isAndroid) {
+      return emulatorUrl;
+    }
+
+    if (Platform.isIOS) {
+      if (Platform.environment.containsKey('SIMULATOR_DEVICE_NAME')) {
+        return localhostUrl;
+      }
+      return defaultUrl;
+    }
+
+    return defaultUrl;
   }
 
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     _pb = PocketBase(_getBaseUrl());
     _isInitialized = true;
   }
@@ -75,7 +87,7 @@ class PbHelper {
   Future<List<TransactionModel>> fetchByMonth(int month, int year) async {
     try {
       final endDate = DateTime(year, month + 1, 0);
-      
+
       final startStr = '$year-${month.toString().padLeft(2, '0')}-01';
       final endStr = '$year-${month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}';
 

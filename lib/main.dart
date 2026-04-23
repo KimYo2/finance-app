@@ -22,7 +22,11 @@ class FinanceApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => TransactionProvider()..initialize()..loadTransactions(),
+      create: (_) {
+        final provider = TransactionProvider();
+        provider.initialize().then((_) => provider.loadTransactions());
+        return provider;
+      },
       child: Platform.isIOS
           ? CupertinoApp(
               debugShowCheckedModeBanner: false,
@@ -125,7 +129,7 @@ class _AppShellState extends State<AppShell> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) => setState(() => _currentIndex = index),
-destinations: const [
+        destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
