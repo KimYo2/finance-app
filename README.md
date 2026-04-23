@@ -9,12 +9,13 @@ Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flu
 - **Riwayat** - Lihat semua transaksi dengan filter (Semua/Pemasukan/Pengeluaran)
 - **Laporan** - Pie chart pengeluaran per kategori, bar chart 6 bulan terakhir
 - **Cross-Platform** - Tampilan native untuk Android (Material) dan iOS (Cupertino)
+- **Offline Mode** - Bisa jalan tanpa internet menggunakan SQLite lokal
 
 ## Teknologi
 
 - Flutter SDK ^3.11.4
 - Provider (state management)
-- PocketBase (backend)
+- SQLite + PocketBase (dual storage)
 - fl_chart (charts)
 - intl (formatting mata uang Indonesia)
 
@@ -24,7 +25,9 @@ Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flu
 lib/
 ├── main.dart                  # Entry point & routing
 ├── database/
-│   └── pb_helper.dart        # PocketBase helper
+│   ├── db_interface.dart     # Abstract storage interface
+│   ├── pb_helper.dart         # PocketBase implementation
+│   └── sqlite_helper.dart     # SQLite implementation
 ├── models/
 │   └── transaction_model.dart
 ├── providers/
@@ -38,6 +41,23 @@ lib/
 │   └── transaction_card.dart
 └── utils/
     └── platform_helper.dart
+```
+
+## Storage Layer
+
+App menggunakan abstract interface `DbInterface` yang bisa switch antara:
+
+1. **SQLite** (default) - Offline, data tersimpan lokal di device
+2. **PocketBase** - Online, data sync ke server
+
+```dart
+// Switch ke PocketBase (online)
+import 'database/pb_helper.dart';
+provider.switchStorage(PbHelper());
+
+// Switch ke SQLite (offline)
+import 'database/sqlite_helper.dart';
+provider.switchStorage(SqliteHelper());
 ```
 
 ## Setup PocketBase
@@ -111,7 +131,8 @@ flutter build ios --release
 
 - Android: API 21+ (Android 5.0)
 - iOS: 13.0+
-- PocketBase: v0.21+
+- SQLite: included (sqflite)
+- PocketBase: v0.21+ (optional for online mode)
 
 ## Lisensi
 
