@@ -1,10 +1,11 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
-import '../database/pb_helper.dart';
+import '../database/db_interface.dart';
+import '../database/sqlite_helper.dart';
 import '../models/transaction_model.dart';
 
 class TransactionProvider extends ChangeNotifier {
-  final PbHelper _pbHelper = PbHelper();
+  DbInterface _dbHelper = SqliteHelper();
   final Connectivity _connectivity = Connectivity();
   List<TransactionModel> _transactions = [];
   bool _isLoading = false;
@@ -17,7 +18,7 @@ class TransactionProvider extends ChangeNotifier {
   bool get isOnline => _isOnline;
 
   Future<void> initialize() async {
-    await _pbHelper.initialize();
+    await _dbHelper.initialize();
     await checkConnectivity();
   }
 
@@ -27,13 +28,22 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void switchStorage(DbInterface newStorage) {
+    _dbHelper = newStorage;
+    initialize();
+  }
+
   Future<void> loadTransactions() async {
-    await checkConnectivity();
-    if (!_isOnline) {
-      _errorMessage = 'Tidak ada koneksi internet';
-      _isLoading = false;
-      notifyListeners();
-      return;
+    if (_dbHelper is! SqliteHelper) {
+      await checkConnectivity();
+      if (!_isOnline) {
+        _errorMessage = 'Tidak ada koneksi internet';
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
+    } else {
+      _isOnline = true;
     }
 
     _isLoading = true;
@@ -41,7 +51,7 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _transactions = await _pbHelper.fetchAllTransactions();
+      _transactions = await _dbHelper.fetchAllTransactions();
     } catch (e) {
       _errorMessage = e.toString();
       debugPrint('Error loading transactions: $e');
@@ -52,15 +62,19 @@ class TransactionProvider extends ChangeNotifier {
   }
 
   Future<bool> addTransaction(TransactionModel transaction) async {
-    await checkConnectivity();
-    if (!_isOnline) {
-      _errorMessage = 'Tidak ada koneksi internet';
-      notifyListeners();
-      return false;
+    if (_dbHelper is! SqliteHelper) {
+      await checkConnectivity();
+      if (!_isOnline) {
+        _errorMessage = 'Tidak ada koneksi internet';
+        notifyListeners();
+        return false;
+      }
+    } else {
+      _isOnline = true;
     }
 
     try {
-      final newTransaction = await _pbHelper.createTransaction(transaction);
+      final newTransaction = await _dbHelper.createTransaction(transaction);
       _transactions.insert(0, newTransaction);
       notifyListeners();
       return true;
@@ -72,15 +86,19 @@ class TransactionProvider extends ChangeNotifier {
   }
 
   Future<bool> deleteTransaction(String id) async {
-    await checkConnectivity();
-    if (!_isOnline) {
-      _errorMessage = 'Tidak ada koneksi internet';
-      notifyListeners();
-      return false;
+    if (_dbHelper is! SqliteHelper) {
+      await checkConnectivity();
+      if (!_isOnline) {
+        _errorMessage = 'Tidak ada koneksi internet';
+        notifyListeners();
+        return false;
+      }
+    } else {
+      _isOnline = true;
     }
 
     try {
-      await _pbHelper.deleteTransaction(id);
+      await _dbHelper.deleteTransaction(id);
       _transactions.removeWhere((t) => t.id == id);
       notifyListeners();
       return true;
@@ -92,11 +110,15 @@ class TransactionProvider extends ChangeNotifier {
   }
 
   Future<bool> updateTransaction(TransactionModel transaction) async {
-    await checkConnectivity();
-    if (!_isOnline) {
-      _errorMessage = 'Tidak ada koneksi internet';
-      notifyListeners();
-      return false;
+    if (_dbHelper is! SqliteHelper) {
+      await checkConnectivity();
+      if (!_isOnline) {
+        _errorMessage = 'Tidak ada koneksi internet';
+        notifyListeners();
+        return false;
+      }
+    } else {
+      _isOnline = true;
     }
 
     try {
@@ -105,7 +127,7 @@ class TransactionProvider extends ChangeNotifier {
         _errorMessage = 'Transaction ID is required for update';
         return false;
       }
-      final updatedTransaction = await _pbHelper.updateTransaction(transactionId, transaction);
+      final updatedTransaction = await _dbHelper.updateTransaction(transactionId, transaction);
       final index = _transactions.indexWhere((t) => t.id == transaction.id);
       if (index != -1) {
         _transactions[index] = updatedTransaction;
