@@ -15,7 +15,7 @@ class AiService {
   String? _lastError;
   DateTime? _lastRequestTime;
 
-  static const String _model = 'llama3-8b-8192';
+  static const String _model = 'llama-3.1-8b-instant';
   static const String _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
   static const Duration _minRequestInterval = Duration(seconds: 3);
 
