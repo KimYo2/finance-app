@@ -1,18 +1,23 @@
+// === FILE: lib/main.dart ===
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'providers/transaction_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/add_transaction_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/report_screen.dart';
+import 'screens/ai_chat_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  initializeDateFormatting('id_ID', null);
+  await dotenv.load(fileName: '.env');
+  await initializeDateFormatting('id_ID', null);
   runApp(const FinanceApp());
 }
 
@@ -21,12 +26,23 @@ class FinanceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) {
-        final provider = TransactionProvider();
-        provider.initialize().then((_) => provider.loadTransactions());
-        return provider;
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) {
+            final provider = TransactionProvider();
+            provider.initialize().then((_) => provider.loadTransactions());
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            final provider = ThemeProvider();
+            provider.initialize();
+            return provider;
+          },
+        ),
+      ],
       child: Platform.isIOS
           ? CupertinoApp(
               debugShowCheckedModeBanner: false,
@@ -45,27 +61,41 @@ class FinanceApp extends StatelessWidget {
               ],
               home: const AppShell(),
             )
-          : MaterialApp(
-              debugShowCheckedModeBanner: false,
-              title: 'Personal Finance',
-              theme: ThemeData(
-                useMaterial3: true,
-                colorScheme: ColorScheme.fromSeed(
-                  seedColor: const Color(0xFF4CAF50),
-                  brightness: Brightness.light,
-                ),
-                platform: TargetPlatform.android,
-              ),
-              locale: const Locale('id', 'ID'),
-              localizationsDelegates: const [
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: const [
-                Locale('id', 'ID'),
-              ],
-              home: const AppShell(),
+          : Consumer<ThemeProvider>(
+              builder: (context, themeProvider, child) {
+                return MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  title: 'Personal Finance',
+                  themeMode: themeProvider.themeMode,
+                  theme: ThemeData(
+                    useMaterial3: true,
+                    colorScheme: ColorScheme.fromSeed(
+                      seedColor: const Color(0xFF4CAF50),
+                      brightness: Brightness.light,
+                    ),
+                    scaffoldBackgroundColor: Colors.white,
+                    platform: TargetPlatform.android,
+                  ),
+                  darkTheme: ThemeData(
+                    useMaterial3: true,
+                    colorScheme: ColorScheme.fromSeed(
+                      seedColor: const Color(0xFF4CAF50),
+                      brightness: Brightness.dark,
+                    ),
+                    scaffoldBackgroundColor: const Color(0xFF121212),
+                  ),
+                  locale: const Locale('id', 'ID'),
+                  localizationsDelegates: const [
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  supportedLocales: const [
+                    Locale('id', 'ID'),
+                  ],
+                  home: const AppShell(),
+                );
+              },
             ),
     );
   }
@@ -147,12 +177,42 @@ class _AppShellState extends State<AppShell> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
-        ),
-        child: const Icon(Icons.add),
+      floatingActionButton: Stack(
+        alignment: Alignment.bottomRight,
+        children: [
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                FloatingActionButton.small(
+                  heroTag: 'ai',
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AiChatScreen()),
+                  ),
+                  backgroundColor: const Color(0xFF4CAF50),
+                  child: const Icon(Icons.auto_awesome,
+                      color: Colors.white, size: 20),
+                  tooltip: 'Catat dengan AI',
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton(
+                  heroTag: 'add',
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+                  ),
+                  backgroundColor: const Color(0xFF4CAF50),
+                  child: const Icon(Icons.add, color: Colors.white),
+                  tooltip: 'Tambah Manual',
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

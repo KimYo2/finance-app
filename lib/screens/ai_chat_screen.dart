@@ -1,0 +1,589 @@
+// === FILE: lib/screens/ai_chat_screen.dart ===
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/transaction_model.dart';
+import '../providers/transaction_provider.dart';
+import '../services/ai_service.dart';
+import '../services/voice_service.dart';
+import '../services/ocr_service.dart';
+import '../utils/app_theme.dart';
+import 'package:intl/intl.dart';
+
+class ChatMessage {
+  final String text;
+  final bool isUser;
+  final bool isLoading;
+  final TransactionModel? pendingTransaction;
+  final DateTime timestamp;
+
+  ChatMessage({
+    required this.text,
+    required this.isUser,
+    this.isLoading = false,
+    this.pendingTransaction,
+    required this.timestamp,
+  });
+}
+
+class AiChatScreen extends StatefulWidget {
+  const AiChatScreen({super.key});
+
+  @override
+  State<AiChatScreen> createState() => _AiChatScreenState();
+}
+
+class _AiChatScreenState extends State<AiChatScreen> {
+  final List<ChatMessage> _messages = [];
+  final TextEditingController _textController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final AiService _aiService = AiService();
+  final VoiceService _voiceService = VoiceService();
+  final OcrService _ocrService = OcrService();
+  bool _isLoading = false;
+  bool _isListening = false;
+  String _recognizedWords = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAiService();
+  }
+
+  Future<void> _initializeAiService() async {
+    await _aiService.initialize();
+    _addMessage(
+      ChatMessage(
+        text: 'Halo! Saya asisten keuanganmu. Ceritakan transaksimu hari ini!\n\nContoh: "makan siang 35rb" atau "gajian 5 juta"',
+        isUser: false,
+        timestamp: DateTime.now(),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _addMessage(ChatMessage message) {
+    setState(() {
+      _messages.add(message);
+    });
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  Future<void> _sendTextMessage(String text) async {
+    if (text.trim().isEmpty) return;
+
+    _textController.clear();
+    _addMessage(
+      ChatMessage(
+        text: text,
+        isUser: true,
+        timestamp: DateTime.now(),
+      ),
+    );
+
+    _addMessage(
+      ChatMessage(
+        text: '',
+        isUser: false,
+        isLoading: true,
+        timestamp: DateTime.now(),
+      ),
+    );
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _aiService.sendMessage(text, DateTime.now());
+
+      setState(() {
+        _messages.removeLast();
+        _isLoading = false;
+      });
+
+      if (response.action == AiAction.addTransaction && response.transaction != null) {
+        _addMessage(
+          ChatMessage(
+            text: response.message,
+            isUser: false,
+            pendingTransaction: response.transaction,
+            timestamp: DateTime.now(),
+          ),
+        );
+      } else {
+        _addMessage(
+          ChatMessage(
+            text: response.message,
+            isUser: false,
+            timestamp: DateTime.now(),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _messages.removeLast();
+        _isLoading = false;
+      });
+      _addMessage(
+        ChatMessage(
+          text: 'Maaf, ada gangguan. Coba lagi ya! 😅',
+          isUser: false,
+          timestamp: DateTime.now(),
+        ),
+      );
+    }
+  }
+
+  Future<void> _startVoiceInput() async {
+    await _voiceService.startListening(
+      onResult: (result) {
+        setState(() {
+          _recognizedWords = result.recognizedWords;
+          if (result.finalResult) {
+            _textController.text = _recognizedWords;
+          }
+        });
+      },
+      onListeningStart: () {
+        setState(() {
+          _isListening = true;
+        });
+      },
+      onListeningStop: () {
+        setState(() {
+          _isListening = false;
+        });
+        if (_recognizedWords.isNotEmpty) {
+          _sendTextMessage(_recognizedWords);
+          _recognizedWords = '';
+        }
+      },
+    );
+  }
+
+  Future<void> _stopVoiceInput() async {
+    await _voiceService.stopListening();
+  }
+
+  Future<void> _scanImage() async {
+    final source = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Kamera'),
+              onTap: () => Navigator.pop(context, 'camera'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galeri'),
+              onTap: () => Navigator.pop(context, 'gallery'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    _addMessage(
+      ChatMessage(
+        text: 'Memproses gambar...',
+        isUser: true,
+        timestamp: DateTime.now(),
+      ),
+    );
+
+    try {
+      final file = await _ocrService.pickImage(fromCamera: source == 'camera');
+      if (file == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final extractedText = await _ocrService.extractText(file);
+
+      final response = await _aiService.parseOcrText(extractedText, DateTime.now());
+
+      setState(() {
+        _messages.removeLast();
+        _isLoading = false;
+      });
+
+      if (response.action == AiAction.addTransaction &&
+          response.transaction != null) {
+        _addMessage(
+          ChatMessage(
+            text: response.message,
+            isUser: false,
+            pendingTransaction: response.transaction,
+            timestamp: DateTime.now(),
+          ),
+        );
+      } else {
+        _addMessage(
+          ChatMessage(
+            text: response.message,
+            isUser: false,
+            timestamp: DateTime.now(),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      _addMessage(
+        ChatMessage(
+          text: 'Gagal memproses gambar. Coba lagi ya! 😅',
+          isUser: false,
+          timestamp: DateTime.now(),
+        ),
+      );
+    }
+  }
+
+  Future<void> _confirmTransaction(
+      TransactionModel transaction, int messageIndex) async {
+    final provider = context.read<TransactionProvider>();
+    final success = await provider.addTransaction(transaction);
+
+    if (success) {
+      setState(() {
+        _messages[messageIndex] = ChatMessage(
+          text: 'Transaksi berhasil disimpan! ✅',
+          isUser: false,
+          timestamp: DateTime.now(),
+        );
+      });
+    } else {
+      setState(() {
+        _messages[messageIndex] = ChatMessage(
+          text: 'Gagal menyimpan transaksi. Coba lagi ya! 😅',
+          isUser: false,
+          timestamp: DateTime.now(),
+        );
+      });
+    }
+  }
+
+  void _cancelTransaction(int messageIndex) {
+    setState(() {
+      _messages[messageIndex] = ChatMessage(
+        text: 'Transaksi dibatalkan.',
+        isUser: false,
+        timestamp: DateTime.now(),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ');
+    final dateFormat = DateFormat('dd MMM yyyy', 'id_ID');
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.smart_toy, size: 24),
+            SizedBox(width: 8),
+            Text('Asisten Keuangan'),
+          ],
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final message = _messages[index];
+                return _buildMessageBubble(
+                  message,
+                  index,
+                  currencyFormat,
+                  dateFormat,
+                );
+              },
+            ),
+          ),
+          _buildInputBar(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageBubble(
+    ChatMessage message,
+    int index,
+    NumberFormat currencyFormat,
+    DateFormat dateFormat,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (message.isLoading) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.darkCard : Colors.grey[100],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              SizedBox(width: 8),
+              Text('Mengetik...'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (message.pendingTransaction != null) {
+      final transaction = message.pendingTransaction!;
+      final isIncome = transaction.type == 'income';
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isIncome ? AppTheme.lightGreen : AppTheme.lightRed,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isIncome ? AppTheme.primaryGreen : Colors.orange,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+                      color: isIncome ? AppTheme.primaryGreen : Colors.orange,
+                    ),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          transaction.category,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          currencyFormat.format(transaction.amount),
+                          style: TextStyle(
+                            color: isIncome
+                                ? AppTheme.primaryGreen
+                                : Colors.orange[700],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          dateFormat.format(transaction.date),
+                          style: TextStyle(
+                            color: isDark
+                                ? AppTheme.darkTextSecondary
+                                : AppTheme.textSecondary,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (message.text.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppTheme.darkCard : Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(message.text),
+                ),
+              ],
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _cancelTransaction(index),
+                      icon: const Icon(Icons.close, size: 18),
+                      label: const Text('Batal'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () =>
+                          _confirmTransaction(transaction, index),
+                      icon: const Icon(Icons.check, size: 18),
+                      label: const Text('Simpan'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryGreen,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Align(
+      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: message.isUser
+              ? AppTheme.primaryGreen
+              : (isDark ? AppTheme.darkCard : Colors.grey[100]),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
+        child: Text(
+          message.text,
+          style: TextStyle(
+            color: message.isUser
+                ? Colors.white
+                : (isDark ? AppTheme.darkTextPrimary : Colors.black87),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.darkCard : Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.document_scanner_outlined),
+              onPressed: _scanImage,
+              tooltip: 'Scan struk',
+            ),
+            Expanded(
+              child: TextField(
+                controller: _textController,
+                decoration: InputDecoration(
+                  hintText: _isListening
+                      ? 'Mendengarkan...'
+                      : 'Ceritakan transaksimu...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: isDark ? AppTheme.darkCardBorder : Colors.grey[100],
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                onSubmitted: (text) {
+                  if (text.isNotEmpty) _sendTextMessage(text);
+                },
+              ),
+            ),
+            const SizedBox(width: 4),
+            GestureDetector(
+              onLongPressStart: (_) => _startVoiceInput(),
+              onLongPressEnd: (_) => _stopVoiceInput(),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: _isListening ? Colors.red : AppTheme.primaryGreen,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _isListening ? Icons.stop : Icons.mic,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            IconButton(
+              icon: Icon(Icons.send_rounded, color: AppTheme.primaryGreen),
+              onPressed: () {
+                final text = _textController.text.trim();
+                if (text.isNotEmpty) _sendTextMessage(text);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
