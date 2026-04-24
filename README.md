@@ -8,6 +8,10 @@ Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flu
 - **Tambah Transaksi** - Input transaksi dengan kategori, nominal, tanggal, dan catatan
 - **Riwayat** - Lihat semua transaksi dengan filter (Semua/Pemasukan/Pengeluaran)
 - **Laporan** - Pie chart pengeluaran per kategori, bar chart 6 bulan terakhir
+- **Dark Mode** - Support tema gelap/terang dengan toggle di dashboard
+- **AI Chat** - Catat transaksi via chat natural language (Gemini 2.5 Flash)
+- **Voice Input** - Catat transaksi via suara (speech-to-text)
+- **OCR Scan** - Scan struk/nota via kamera (ML Kit text recognition)
 - **Cross-Platform** - Tampilan native untuk Android (Material) dan iOS (Cupertino)
 - **Offline Mode** - Bisa jalan tanpa internet menggunakan SQLite lokal
 
@@ -18,6 +22,9 @@ Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flu
 - SQLite + PocketBase (dual storage)
 - fl_chart (charts)
 - intl (formatting mata uang Indonesia)
+- Google Generative AI (Gemini 2.5 Flash)
+- Google ML Kit Text Recognition (OCR)
+- Flutter Speech to Text
 
 ## Struktur Proyek
 
@@ -31,15 +38,22 @@ lib/
 ├── models/
 │   └── transaction_model.dart
 ├── providers/
-│   └── transaction_provider.dart
+│   ├── transaction_provider.dart
+│   └── theme_provider.dart   # Dark mode management
 ├── screens/
 │   ├── dashboard_screen.dart
 │   ├── add_transaction_screen.dart
 │   ├── history_screen.dart
-│   └── report_screen.dart
+│   ├── report_screen.dart
+│   └── ai_chat_screen.dart  # AI chat with voice & OCR
+├── services/
+│   ├── ai_service.dart      # Gemini AI integration
+│   ├── voice_service.dart   # Speech-to-text
+│   └── ocr_service.dart    # ML Kit text recognition
 ├── widgets/
 │   └── transaction_card.dart
 └── utils/
+    ├── app_theme.dart       # Theme colors (light/dark)
     └── platform_helper.dart
 ```
 
@@ -64,6 +78,51 @@ provider.switchStorage(PbHelper());
 import 'database/sqlite_helper.dart';
 provider.switchStorage(SqliteHelper());
 ```
+
+## AI Chat Integration
+
+Aplikasi menggunakan **Gemini 2.5 Flash** untuk memproses input natural language:
+
+1. **Setup API Key:**
+   - Buka: https://aistudio.google.com/app/apikey
+   - Login dengan Google Account
+   - Klik "Create API Key"
+   - Copy ke file `.env`:
+
+   ```
+   GEMINI_API_KEY=AIzaSy...
+   ```
+
+2. **Cara Penggunaan:**
+   - Tap tombol AI (icon robot) di FAB dashboard
+   - Ceritakan transaksi secara natural, contoh:
+     - "makan siang 35rb"
+     - "gajian 5 juta"
+     - "beli bensin 150rb"
+   - AI akan ekstrak: nominal, kategori, tipe (income/expense)
+   - Konfirmasi sebelum simpan
+
+3. **Fitur:**
+   - Natural language input (Indonesia/English)
+   - OCR scan struk/nota
+   - Voice input (tekan lama mic button)
+   - Konfirmasi sebelum simpan
+
+## Voice Input
+
+1. Tekan lama (long press) tombol mic di input bar
+2. Bicarafakan transaksi
+3. Tekan tombol stop atau tunggu 3 detik hening
+4. Teks otomatis terkirim
+
+Mendukung bahasa Indonesia dengan auto-detect locale.
+
+## OCR Scan
+
+1. Tap tombol kamera di input bar
+2. Pilih sumber: Kamera atau Galeri
+3. Ambil foto struk/nota
+4. AI akan ekstrak nominal dan kategori dari gambar
 
 ## Setup PocketBase
 

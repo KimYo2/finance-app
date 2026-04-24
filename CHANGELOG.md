@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-04-24
+
+### Added
+
+- **Dark Mode** - Support tema gelap/terang
+  - Toggle di AppBar dashboard
+  - Simpan preferensi di SharedPreferences
+  - Semua screen sudah dark mode aware
+
+- **AI Chat Integration** - Catat transaksi via natural language
+  - Gemini 2.5 Flash integration
+  - Input teks natural: "makan siang 35rb", "gajian 5 juta"
+  - Ekstrak otomatis: nominal, kategori, tipe (income/expense)
+  - Konfirmasi sebelum simpan
+
+- **Voice Input** - Catat transaksi via suara
+  - Speech-to-text dengan speech_to_text package
+  - Auto-detect locale Indonesia dengan fallback
+  - Tekan lama tombol mic untuk merekam
+
+- **OCR Scan** - Scan struk/nota via kamera
+  - Google ML Kit text recognition
+  - Ambil dari kamera atau galeri
+  - Tampilkan preview gambar di chat
+  - AI ekstrak transaksi dari teks hasil OCR
+
+### Changed
+
+- All screens updated with dark mode support
+- TransactionCard now uses Theme.of(context).brightness
+
 ## [1.0.0] - 2026-04-23
 
 ### Added
