@@ -16,7 +16,11 @@ import 'screens/ai_chat_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    // .env maybe not found in some environments, continue anyway
+  }
   await initializeDateFormatting('id_ID', null);
   runApp(const FinanceApp());
 }
