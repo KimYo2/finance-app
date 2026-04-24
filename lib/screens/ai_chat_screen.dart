@@ -14,6 +14,7 @@ class ChatMessage {
   final String text;
   final bool isUser;
   final bool isLoading;
+  final bool isRetryButton;
   final TransactionModel? pendingTransaction;
   final File? imageFile;
   final DateTime timestamp;
@@ -22,6 +23,7 @@ class ChatMessage {
     required this.text,
     required this.isUser,
     this.isLoading = false,
+    this.isRetryButton = false,
     this.pendingTransaction,
     this.imageFile,
     required this.timestamp,
@@ -54,19 +56,34 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
 
   Future<void> _initializeAiService() async {
-    await _aiService.initialize();
-    _addMessage(
-      ChatMessage(
-        text: '👋 Halo! Saya asisten keuanganmu.\n\n'
-              'Kamu bisa:\n'
-              '⌨️ Ketik — "makan siang 35rb"\n'
-              '🎤 Tahan mic — ucapkan transaksimu\n'
-              '📷 Tap scan — foto struk/nota\n\n'
-              'Mau catat transaksi apa hari ini?',
-        isUser: false,
-        timestamp: DateTime.now(),
-      ),
-    );
+    final success = await _aiService.initialize();
+    
+    if (success) {
+      _addMessage(
+        ChatMessage(
+          text: '👋 Halo! Saya asisten keuanganmu.\n\n'
+                'Kamu bisa:\n'
+                '⌨️ Ketik — "makan siang 35rb"\n'
+                '🎤 Tahan mic — ucapkan transaksimu\n'
+                '📷 Tap scan — foto struk/nota\n\n'
+                'Mau catat transaksi apa hari ini?',
+          isUser: false,
+          timestamp: DateTime.now(),
+        ),
+      );
+    } else {
+      _addMessage(
+        ChatMessage(
+          text: '⚠️ AI belum terkonfigurasi.\n\n'
+                'Tambahkan GEMINI_API_KEY di file .env:\n'
+                'GEMINI_API_KEY=api_key_kamu\n\n'
+                'Lalu restart aplikasi.',
+          isUser: false,
+          isRetryButton: true,
+          timestamp: DateTime.now(),
+        ),
+      );
+    }
   }
 
   @override
@@ -151,13 +168,23 @@ class _AiChatScreenState extends State<AiChatScreen> {
         _messages.removeLast();
         _isLoading = false;
       });
-      _addMessage(
-        ChatMessage(
-          text: 'Maaf, ada gangguan. Coba lagi ya! 😅',
+
+      if (!_aiService.isInitialized) {
+        _addMessage(ChatMessage(
+          text: 'Tap tombol di bawah untuk coba koneksi ulang ke AI 🔄',
           isUser: false,
+          isRetryButton: true,
           timestamp: DateTime.now(),
-        ),
-      );
+        ));
+      } else {
+        _addMessage(
+          ChatMessage(
+            text: 'Maaf, ada gangguan. Coba lagi ya! 😅',
+            isUser: false,
+            timestamp: DateTime.now(),
+          ),
+        );
+      }
     }
   }
 
@@ -408,6 +435,62 @@ class _AiChatScreenState extends State<AiChatScreen> {
               ),
               SizedBox(width: 8),
               Text('Mengetik...'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (message.isRetryButton) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isDark ? AppTheme.darkCard : Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  message.text,
+                  style: TextStyle(
+                    color: isDark ? AppTheme.darkTextPrimary : Colors.black87,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  setState(() {
+                    _messages.removeWhere((m) => m.isRetryButton);
+                  });
+                  final success = await _aiService.reinitialize();
+                  if (success && mounted) {
+                    _addMessage(ChatMessage(
+                      text: '✅ Berhasil terhubung ke AI! Silakan ketik transaksimu.',
+                      isUser: false,
+                      timestamp: DateTime.now(),
+                    ));
+                  } else if (mounted) {
+                    _addMessage(ChatMessage(
+                      text: 'Masih gagal. Pastikan API key benar dan internet aktif.',
+                      isUser: false,
+                      isRetryButton: true,
+                      timestamp: DateTime.now(),
+                    ));
+                  }
+                },
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Coba Hubungkan Ulang'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryGreen,
+                  foregroundColor: Colors.white,
+                ),
+              ),
             ],
           ),
         ),
