@@ -37,6 +37,15 @@ class OcrService {
     }
   }
 
+  String buildOcrPrompt(String extractedText) {
+    return 'Tolong analisis struk/nota berikut dan ekstrak informasi transaksi:\n\n'
+        '$extractedText\n\n'
+        'Tentukan: total nominal (dalam angka polos tanpa titik/koma), kategori yang '
+        'paling tepat dari list ini: Makanan, Transportasi, Belanja, Hiburan, '
+        'Kesehatan, Pendidikan, Tagihan, Lainnya, Gaji, Bonus, Usaha, Investasi, '
+        'Hadiah, dan catatan singkat. Balas dalam format JSON saja.';
+  }
+
   void dispose() {
     _textRecognizer.close();
   }

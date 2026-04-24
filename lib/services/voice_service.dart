@@ -25,7 +25,6 @@ class VoiceService {
     required Function(SpeechRecognitionResult) onResult,
     required Function() onListeningStart,
     required Function() onListeningStop,
-    String localeId = 'id_ID',
   }) async {
     if (!_isInitialized) {
       final initialized = await initialize();
@@ -37,9 +36,13 @@ class VoiceService {
     _isListening = true;
     onListeningStart();
 
+    final locales = await _speech.locales();
+    final hasIndonesian = locales.any((l) => l.localeId.contains('id'));
+    final selectedLocale = hasIndonesian ? 'id_ID' : '';
+
     await _speech.listen(
       onResult: onResult,
-      localeId: localeId,
+      localeId: selectedLocale,
       listenFor: const Duration(seconds: 30),
     );
   }

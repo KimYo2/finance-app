@@ -1,4 +1,5 @@
 // === FILE: lib/screens/ai_chat_screen.dart ===
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction_model.dart';
@@ -14,6 +15,7 @@ class ChatMessage {
   final bool isUser;
   final bool isLoading;
   final TransactionModel? pendingTransaction;
+  final File? imageFile;
   final DateTime timestamp;
 
   ChatMessage({
@@ -21,6 +23,7 @@ class ChatMessage {
     required this.isUser,
     this.isLoading = false,
     this.pendingTransaction,
+    this.imageFile,
     required this.timestamp,
   });
 }
@@ -207,67 +210,80 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
     if (source == null) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    final file = await _ocrService.pickImage(fromCamera: source == 'camera');
+    if (file == null) return;
 
-    _addMessage(
-      ChatMessage(
-        text: 'Memproses gambar...',
+    setState(() {
+      _messages.add(ChatMessage(
+        text: '[Memindai struk...]',
         isUser: true,
+        imageFile: file,
         timestamp: DateTime.now(),
-      ),
-    );
+      ));
+      _messages.add(ChatMessage(
+        text: '',
+        isUser: false,
+        isLoading: true,
+        timestamp: DateTime.now(),
+      ));
+    });
+    _scrollToBottom();
 
     try {
-      final file = await _ocrService.pickImage(fromCamera: source == 'camera');
-      if (file == null) {
-        setState(() {
-          _isLoading = false;
-        });
+      final extractedText = await _ocrService.extractText(file);
+
+      if (extractedText.trim().isEmpty) {
+        _replaceLoadingWithMessage(
+          'Maaf, tidak ada teks yang bisa dibaca dari gambar ini. '
+          'Coba foto yang lebih jelas ya! 📸',
+        );
         return;
       }
 
-      final extractedText = await _ocrService.extractText(file);
+      final prompt = _ocrService.buildOcrPrompt(extractedText);
+      final response = await _aiService.sendMessage(prompt, DateTime.now());
+      _replaceLoadingWithResponse(response);
+    } catch (e) {
+      _replaceLoadingWithMessage('Gagal membaca gambar: $e');
+    }
+  }
 
-      final response = await _aiService.parseOcrText(extractedText, DateTime.now());
-
-      setState(() {
+  void _replaceLoadingWithResponse(AiResponse response) {
+    setState(() {
+      if (_messages.isNotEmpty && _messages.last.isLoading) {
         _messages.removeLast();
-        _isLoading = false;
-      });
-
+      }
       if (response.action == AiAction.addTransaction &&
           response.transaction != null) {
-        _addMessage(
-          ChatMessage(
-            text: response.message,
-            isUser: false,
-            pendingTransaction: response.transaction,
-            timestamp: DateTime.now(),
-          ),
-        );
+        _messages.add(ChatMessage(
+          text: response.message,
+          isUser: false,
+          pendingTransaction: response.transaction,
+          timestamp: DateTime.now(),
+        ));
       } else {
-        _addMessage(
-          ChatMessage(
-            text: response.message,
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
-        );
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      _addMessage(
-        ChatMessage(
-          text: 'Gagal memproses gambar. Coba lagi ya! 😅',
+        _messages.add(ChatMessage(
+          text: response.message,
           isUser: false,
           timestamp: DateTime.now(),
-        ),
-      );
-    }
+        ));
+      }
+    });
+    _scrollToBottom();
+  }
+
+  void _replaceLoadingWithMessage(String message) {
+    setState(() {
+      if (_messages.isNotEmpty && _messages.last.isLoading) {
+        _messages.removeLast();
+      }
+      _messages.add(ChatMessage(
+        text: message,
+        isUser: false,
+        timestamp: DateTime.now(),
+      ));
+    });
+    _scrollToBottom();
   }
 
   Future<void> _confirmTransaction(
@@ -501,13 +517,30 @@ class _AiChatScreenState extends State<AiChatScreen> {
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
-        child: Text(
-          message.text,
-          style: TextStyle(
-            color: message.isUser
-                ? Colors.white
-                : (isDark ? AppTheme.darkTextPrimary : Colors.black87),
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (message.imageFile != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  message.imageFile!,
+                  height: 150,
+                  width: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            Text(
+              message.text,
+              style: TextStyle(
+                color: message.isUser
+                    ? Colors.white
+                    : (isDark ? AppTheme.darkTextPrimary : Colors.black87),
+              ),
+            ),
+          ],
         ),
       ),
     );
