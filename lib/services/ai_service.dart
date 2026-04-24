@@ -15,8 +15,8 @@ class AiService {
   String? _lastError;
   DateTime? _lastRequestTime;
 
-  static const String _model = 'microsoft/Phi-3-mini-4k-instruct-gguf';
-  static const String _baseUrl = 'https://router.huggingface.co/v1/chat/completions';
+  static const String _model = 'llama3-8b-8192';
+  static const String _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
   static const Duration _minRequestInterval = Duration(seconds: 3);
 
   factory AiService() {
@@ -86,13 +86,13 @@ ATURAN PENTING:
   Future<bool> initialize() async {
     if (_isInitialized) return true;
 
-    _apiToken = dotenv.env['HF_TOKEN'] ?? '';
+    _apiToken = dotenv.env['GROQ_API_KEY'] ?? '';
 
     if (kDebugMode) {
       if (_apiToken.isEmpty) {
-        debugPrint('[AiService] ERROR: HF_TOKEN tidak ditemukan di .env!');
+        debugPrint('[AiService] ERROR: GROQ_API_KEY tidak ditemukan di .env!');
       } else {
-        debugPrint('[AiService] HF Token: ${_apiToken.substring(0, 8)}...');
+        debugPrint('[AiService] Groq API Key: ${_apiToken.substring(0, 8)}...');
       }
     }
 
@@ -242,7 +242,7 @@ ATURAN PENTING:
                  '2. Buka Settings → Access Tokens\n'
                  '3. Klik "New token" → role: Read\n'
                  '4. Copy token → paste di file .env:\n'
-                 '   HF_TOKEN=hf_xxxxxxxxxxxxx\n\n'
+                 '   GROQ_API_KEY=gsk_xxxxxxxxxxxxx\n\n'
                  'Lalu restart aplikasi! 🔄',
       );
     }
