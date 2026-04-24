@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
+import '../utils/app_theme.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final TransactionModel? existingTransaction;

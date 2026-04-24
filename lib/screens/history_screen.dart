@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
 import '../screens/add_transaction_screen.dart';
+import '../utils/app_theme.dart';
 import '../widgets/transaction_card.dart';
 
 class HistoryScreen extends StatefulWidget {

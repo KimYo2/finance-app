@@ -5,8 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/theme_provider.dart';
 import '../screens/add_transaction_screen.dart';
 import '../screens/history_screen.dart';
+import '../utils/app_theme.dart';
 import '../widgets/transaction_card.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -29,6 +31,7 @@ class DashboardScreen extends StatelessWidget {
         final isIOS = Platform.isIOS;
         final monthFormat = DateFormat('MMMM', 'id_ID');
         final currentMonth = monthFormat.format(DateTime.now());
+        final isDark = Theme.of(context).brightness == Brightness.dark;
 
         Widget body = RefreshIndicator(
           onRefresh: () => provider.loadTransactions(),
@@ -188,12 +191,12 @@ class DashboardScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Transaksi Terbaru',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1A1A1A),
+                        color: isDark ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
                       ),
                     ),
                     TextButton(
@@ -269,22 +272,21 @@ class DashboardScreen extends StatelessWidget {
           appBar: AppBar(
             title: const Text('Personal Finance'),
             centerTitle: true,
+            actions: [
+              Consumer<ThemeProvider>(
+                builder: (context, themeProvider, _) => IconButton(
+                  icon: Icon(
+                    themeProvider.isDarkMode
+                        ? Icons.light_mode_outlined
+                        : Icons.dark_mode_outlined,
+                  ),
+                  onPressed: themeProvider.toggleTheme,
+                  tooltip: themeProvider.isDarkMode ? 'Mode Terang' : 'Mode Gelap',
+                ),
+              ),
+            ],
           ),
           body: body,
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                isIOS
-                    ? CupertinoPageRoute(builder: (_) => const AddTransactionScreen())
-                    : MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
-              );
-            },
-            backgroundColor: const Color(0xFF4CAF50),
-            foregroundColor: Colors.white,
-            elevation: 4,
-            child: const Icon(Icons.add, size: 28),
-          ),
         );
       },
     );
