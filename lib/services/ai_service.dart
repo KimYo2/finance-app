@@ -16,8 +16,7 @@ class AiService {
   DateTime? _lastRequestTime;
 
   static const String _model = 'mistralai/Mistral-7B-Instruct-v0.3';
-  static const String _baseUrl =
-      'https://api-inference.huggingface.co/models/$_model/v1/chat/completions';
+  static const String _baseUrl = 'https://router.huggingface.co/v1/chat/completions';
   static const Duration _minRequestInterval = Duration(seconds: 3);
 
   factory AiService() {
