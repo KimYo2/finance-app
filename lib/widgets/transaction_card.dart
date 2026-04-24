@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction_model.dart';
+import '../utils/app_theme.dart';
 
 class TransactionCard extends StatelessWidget {
   final TransactionModel transaction;
@@ -19,6 +20,7 @@ class TransactionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIOS = Platform.isIOS;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final currencyFormat = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
@@ -27,7 +29,9 @@ class TransactionCard extends StatelessWidget {
 
     final dateFormat = DateFormat('dd MMM yyyy', 'id_ID');
     final isIncome = transaction.type == 'income';
-    final amountColor = isIncome ? Colors.green : Colors.red;
+    final amountColor = isIncome 
+        ? AppTheme.incomeColor(context) 
+        : AppTheme.expenseColor(context);
     final amountPrefix = isIncome ? '+ ' : '- ';
 
     final iconData = _getCategoryIcon(transaction.category);
@@ -41,7 +45,7 @@ class TransactionCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: CupertinoColors.systemBackground,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFEEEEEE)),
+            border: Border.all(color: AppTheme.cardBorderColor(context)),
           ),
           child: Row(
             children: [
@@ -58,7 +62,7 @@ class TransactionCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: isIncome ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE),
+                  color: isIncome ? AppTheme.lightGreen : AppTheme.lightRed,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -77,27 +81,27 @@ class TransactionCard extends StatelessWidget {
                   children: [
                     Text(
                       transaction.category,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
-                        color: Color(0xFF1A1A1A),
+                        color: AppTheme.textPrimaryColor(context),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       dateFormat.format(transaction.date),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: Color(0xFF757575),
+                        color: AppTheme.textSecondaryColor(context),
                       ),
                     ),
                     if (transaction.note.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
                         transaction.note,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color: Color(0xFF757575),
+                          color: AppTheme.textSecondaryColor(context),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -125,7 +129,7 @@ class TransactionCard extends StatelessWidget {
                       child: Icon(
                         Icons.edit_outlined,
                         size: 13,
-                        color: Colors.grey.shade400,
+                        color: isDark ? Colors.grey[600] : Colors.grey.shade400,
                       ),
                     ),
                   ],
@@ -142,8 +146,9 @@ class TransactionCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFEEEEEE)),
+        side: BorderSide(color: AppTheme.cardBorderColor(context)),
       ),
+      color: AppTheme.cardColor(context),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap ?? () {},
@@ -164,7 +169,7 @@ class TransactionCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: isIncome ? Colors.green.shade50 : Colors.red.shade50,
+                  color: isIncome ? AppTheme.lightGreen : AppTheme.lightRed,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -183,10 +188,10 @@ class TransactionCard extends StatelessWidget {
                   children: [
                     Text(
                       transaction.category,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
-                        color: Color(0xFF1A1A1A),
+                        color: AppTheme.textPrimaryColor(context),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -194,7 +199,7 @@ class TransactionCard extends StatelessWidget {
                       dateFormat.format(transaction.date),
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.grey.shade500,
+                        color: AppTheme.textSecondaryColor(context),
                       ),
                     ),
                     if (transaction.note.isNotEmpty) ...[
@@ -203,7 +208,7 @@ class TransactionCard extends StatelessWidget {
                         transaction.note,
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey.shade500,
+                          color: AppTheme.textSecondaryColor(context),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -231,7 +236,7 @@ class TransactionCard extends StatelessWidget {
                       child: Icon(
                         Icons.edit_outlined,
                         size: 13,
-                        color: Colors.grey.shade400,
+                        color: isDark ? Colors.grey[600] : Colors.grey.shade400,
                       ),
                     ),
                   ],
