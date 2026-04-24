@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
+import '../utils/app_theme.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final TransactionModel? existingTransaction;
@@ -333,13 +334,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         prefixStyle: const TextStyle(fontWeight: FontWeight.bold),
         hintText: '0',
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -410,13 +411,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           color: _transactionType == 'expense' ? Colors.red : Colors.green,
         ),
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -531,13 +532,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         labelText: 'Tanggal',
         prefixIcon: const Icon(Icons.calendar_today, size: 20),
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -625,13 +626,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       decoration: InputDecoration(
         labelText: 'Catatan (opsional)',
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -676,10 +677,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: ElevatedButton(
         onPressed: _isLoading ? null : _saveTransaction,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isValid ? const Color(0xFF4CAF50) : Colors.grey,
-          foregroundColor: Colors.white,
+          backgroundColor: isValid 
+            ? AppTheme.primaryGreen 
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
+          foregroundColor: isValid 
+            ? Colors.white 
+            : Theme.of(context).colorScheme.onSurfaceVariant,
+          minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         child: _isLoading

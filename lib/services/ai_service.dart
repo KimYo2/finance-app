@@ -1,6 +1,7 @@
 // === FILE: lib/services/ai_service.dart ===
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
@@ -64,36 +65,73 @@ Response: {"action":"chat","message":"Untuk melihat total pengeluaran, kamu bisa
 PENTING: Selalu balas dalam format JSON valid. Jangan tambahkan teks di luar JSON.
 ''';
 
+  bool _isInitialized = false;
+
   Future<void> initialize() async {
     final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+    
+    if (apiKey.isEmpty) {
+      debugPrint('WARNING: GEMINI_API_KEY tidak ditemukan di .env');
+      return;
+    }
+    
     _model = GenerativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       apiKey: apiKey,
+      generationConfig: GenerationConfig(
+        temperature: 0.3,
+        maxOutputTokens: 512,
+      ),
     );
     _chat = _model.startChat(
       history: [
         Content.system(_systemPrompt),
       ],
     );
+    _isInitialized = true;
   }
 
   Future<AiResponse> sendMessage(String message, DateTime currentDate) async {
+    if (!_isInitialized) {
+      return AiResponse(
+        action: AiAction.chat,
+        message: 'API Key Gemini belum dikonfigurasi. '
+                 'Tambahkan GEMINI_API_KEY di file .env ya! 🔑\n\n'
+                 'Cara dapat API key gratis:\n'
+                 '1. Buka aistudio.google.com\n'
+                 '2. Klik "Get API Key"\n'
+                 '3. Copy dan paste ke file .env',
+      );
+    }
+    
     try {
       final messageWithContext =
           '$message\n[Tanggal hari ini: ${currentDate.toIso8601String().split('T')[0]}]';
 
       final response = await _chat.sendMessage(
         Content.text(messageWithContext),
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () => throw Exception('Request timeout'),
       );
 
       final responseText = response.text ?? '';
+      if (responseText.isEmpty) {
+        throw Exception('Empty response from AI');
+      }
 
       return _parseResponse(responseText);
-    } catch (e) {
-      return AiResponse(
-        action: AiAction.chat,
-        message: 'Maaf, ada gangguan koneksi AI. Coba lagi ya! 😅',
-      );
+    } on Exception catch (e) {
+      debugPrint('AI Error: $e');
+      String errorMsg = 'Maaf, AI sedang tidak tersedia. 😅';
+      if (e.toString().contains('timeout')) {
+        errorMsg = 'Koneksi AI timeout. Coba lagi ya! ⏱️';
+      } else if (e.toString().contains('API_KEY')) {
+        errorMsg = 'API Key tidak valid. Cek file .env kamu ya! 🔑';
+      } else if (e.toString().contains('quota')) {
+        errorMsg = 'Kuota API habis untuk hari ini. Coba besok! 📊';
+      }
+      return AiResponse(action: AiAction.chat, message: errorMsg);
     }
   }
 

@@ -57,7 +57,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
     await _aiService.initialize();
     _addMessage(
       ChatMessage(
-        text: 'Halo! Saya asisten keuanganmu. Ceritakan transaksimu hari ini!\n\nContoh: "makan siang 35rb" atau "gajian 5 juta"',
+        text: '👋 Halo! Saya asisten keuanganmu.\n\n'
+              'Kamu bisa:\n'
+              '⌨️ Ketik — "makan siang 35rb"\n'
+              '🎤 Tahan mic — ucapkan transaksimu\n'
+              '📷 Tap scan — foto struk/nota\n\n'
+              'Mau catat transaksi apa hari ini?',
         isUser: false,
         timestamp: DateTime.now(),
       ),

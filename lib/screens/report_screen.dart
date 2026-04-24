@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/transaction_provider.dart';
+import '../utils/app_theme.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -165,7 +166,6 @@ class _ReportScreenState extends State<ReportScreen> {
     NumberFormat currencyFormat,
   ) {
     final isIOS = Platform.isIOS;
-
     return Column(
       children: [
         Row(
@@ -174,8 +174,8 @@ class _ReportScreenState extends State<ReportScreen> {
               child: _buildCard(
                 'Pemasukan',
                 currencyFormat.format(income),
-                Colors.green,
-                isIOS ? const Color(0xFFE8F5E9) : Colors.green.shade50,
+                AppTheme.primaryGreen,
+                _getCardColor(context, AppTheme.lightGreen),
                 isIOS ? CupertinoIcons.arrow_down_circle_fill : Icons.arrow_downward,
               ),
             ),
@@ -185,7 +185,7 @@ class _ReportScreenState extends State<ReportScreen> {
                 'Pengeluaran',
                 currencyFormat.format(expense),
                 Colors.red,
-                isIOS ? const Color(0xFFFFEBEE) : Colors.red.shade50,
+                _getCardColor(context, AppTheme.lightRed),
                 isIOS ? CupertinoIcons.arrow_up_circle_fill : Icons.arrow_upward,
               ),
             ),
@@ -195,12 +195,19 @@ class _ReportScreenState extends State<ReportScreen> {
         _buildCard(
           'Saldo Bersih',
           currencyFormat.format(balance),
-          balance >= 0 ? Colors.green : Colors.red,
-          isIOS ? const Color(0xFFE3F2FD) : Colors.blue.shade50,
+          balance >= 0 ? AppTheme.primaryGreen : Colors.red,
+          _getCardColor(context, const Color(0xFFE3F2FD)),
           isIOS ? CupertinoIcons.money_dollar_circle_fill : Icons.account_balance_wallet,
         ),
       ],
     );
+  }
+
+  Color _getCardColor(BuildContext context, Color lightColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark
+        ? Theme.of(context).colorScheme.surfaceContainer
+        : lightColor;
   }
 
   Widget _buildCard(
