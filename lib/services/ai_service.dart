@@ -71,23 +71,34 @@ PENTING: Selalu balas dalam format JSON valid. Jangan tambahkan teks di luar JSO
 ''';
 
   Future<bool> initialize() async {
-    if (_isInitialized) return true;
-
+    // SELALU start fresh - jangan return early meski sudah initialized
+    // ini memastikan API key baru selalu digunakan
     try {
       final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
 
       if (kDebugMode) {
+        debugPrint('[AiService] ===== INITIALIZING =====');
         if (apiKey.isEmpty) {
           debugPrint('[AiService] ERROR: GEMINI_API_KEY kosong!');
         } else {
-          debugPrint('[AiService] API Key loaded: ${apiKey.substring(0, 8)}...');
+          debugPrint('[AiService] API Key: ${apiKey.substring(0, 10)}...');
         }
       }
 
       if (apiKey.isEmpty) {
         _lastError = 'api_key_empty';
+        _isInitialized = false;
         return false;
       }
+
+      // Buat instance baru setiap kali initialize
+      _isInitialized = false;
+      _model = null;
+      _chat = null;
+      _lastError = null;
+      
+      // Re-read dari dotenv untuk memastikan dapat value terbaru
+      await dotenv.load();
 
       _model = GenerativeModel(
         model: 'gemini-2.0-flash',
@@ -95,18 +106,12 @@ PENTING: Selalu balas dalam format JSON valid. Jangan tambahkan teks di luar JSO
         generationConfig: GenerationConfig(
           temperature: 0.3,
           maxOutputTokens: 512,
-          responseMimeType: 'text/plain',
         ),
       );
 
-      _chat = _model!.startChat(
-        history: [
-          Content.system(_systemPrompt),
-        ],
-      );
+      _chat = _model!.startChat();
 
       _isInitialized = true;
-      _lastError = null;
       debugPrint('[AiService] Initialized successfully!');
       return true;
 
@@ -127,11 +132,10 @@ PENTING: Selalu balas dalam format JSON valid. Jangan tambahkan teks di luar JSO
   }
 
   Future<AiResponse> sendMessage(String message, DateTime currentDate) async {
-    if (!_isInitialized) {
-      final success = await initialize();
-      if (!success) {
-        return _buildErrorResponse(_lastError);
-      }
+    // SELALU initialize ulang untuk dapat API key terbaru
+    final success = await initialize();
+    if (!success) {
+      return _buildErrorResponse(_lastError);
     }
 
     try {
@@ -148,7 +152,7 @@ PENTING: Selalu balas dalam format JSON valid. Jangan tambahkan teks di luar JSO
       final responseText = response.text ?? '';
       
       if (kDebugMode) {
-        debugPrint('[AiService] Raw response: $responseText');
+        debugPrint('[AiService] Response: ${responseText.substring(0, 100)}...');
       }
       
       if (responseText.isEmpty) {
