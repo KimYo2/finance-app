@@ -39,6 +39,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
   final AiService _aiService = AiService();
   final VoiceService _voiceService = VoiceService();
   final OcrService _ocrService = OcrService();
+  // ignore: unused_field - used for loading states
   bool _isLoading = false;
   bool _isListening = false;
   String _recognizedWords = '';

@@ -2,14 +2,14 @@
 import 'dart:convert';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_genai/google_genai.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../models/transaction_model.dart';
 
 class AiService {
   static AiService? _instance;
   late GenerativeModel _model;
-  ChatSession? _chat;
+  late ChatSession _chat;
 
   factory AiService() {
     _instance ??= AiService._internal();
@@ -69,21 +69,20 @@ PENTING: Selalu balas dalam format JSON valid. Jangan tambahkan teks di luar JSO
     _model = GenerativeModel(
       model: 'gemini-2.5-flash',
       apiKey: apiKey,
-      systemInstruction: _systemPrompt,
     );
-    _chat = _model.startChat();
+    _chat = _model.startChat(
+      history: [
+        Content.system(_systemPrompt),
+      ],
+    );
   }
 
   Future<AiResponse> sendMessage(String message, DateTime currentDate) async {
     try {
-      if (_chat == null) {
-        await initialize();
-      }
-
       final messageWithContext =
           '$message\n[Tanggal hari ini: ${currentDate.toIso8601String().split('T')[0]}]';
 
-      final response = await _chat!.sendMessage(
+      final response = await _chat.sendMessage(
         Content.text(messageWithContext),
       );
 
@@ -100,16 +99,14 @@ PENTING: Selalu balas dalam format JSON valid. Jangan tambahkan teks di luar JSO
 
   Future<AiResponse> parseOcrText(String ocrText, DateTime currentDate) async {
     try {
-      if (_chat == null) {
-        await initialize();
-      }
-
       final prompt =
           'Tolong analisis struk/nota berikut dan ekstrak informasi transaksi:\n\n'
           '$ocrText\n\n'
           'Tentukan: total nominal (dalam angka polos tanpa titik/koma), kategori yang paling tepat dari list ini: Makanan, Transportasi, Belanja, Hiburan, Kesehatan, Pendidikan, Tagihan, Lainnya, Gaji, Bonus, Usaha, Investasi, Hadiah, dan catatan singkat. Balas dalam format JSON saja.';
 
-      final response = await _chat!.sendMessage(Content.text(prompt));
+      final response = await _chat.sendMessage(
+        Content.text(prompt),
+      );
 
       final responseText = response.text ?? '';
 

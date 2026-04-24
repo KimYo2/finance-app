@@ -41,9 +41,6 @@ class VoiceService {
       onResult: onResult,
       localeId: localeId,
       listenFor: const Duration(seconds: 30),
-      pauseFor: const Duration(seconds: 3),
-      cancelOnError: false,
-      partialResults: true,
     );
   }
 
