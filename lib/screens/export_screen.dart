@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -389,69 +390,251 @@ class _ExportScreenState extends State<ExportScreen> {
     );
   }
 
+  Future<String?> _pickFolder() async {
+    final result = await FilePicker.platform.getDirectoryPath(
+      dialogTitle: 'Pilih Folder Penyimpanan',
+    );
+    return result;
+  }
+
+  Future<String?> _showSaveOrShareDialog(BuildContext context) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Simpan atau Bagikan?',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Pilih cara menyimpan file export kamu',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ListTile(
+                  onTap: () => Navigator.pop(context, 'folder'),
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4CAF50).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.folder_open_rounded,
+                      color: Color(0xFF4CAF50),
+                    ),
+                  ),
+                  title: const Text(
+                    'Simpan ke Folder',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text(
+                    'Pilih folder penyimpanan di HP kamu',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const Divider(height: 8),
+                ListTile(
+                  onTap: () => Navigator.pop(context, 'share'),
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.share_rounded,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  title: const Text(
+                    'Bagikan',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text(
+                    'Kirim via WhatsApp, Drive, Email, dll',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context, null),
+                    child: const Text(
+                      'Batal',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSnackbar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : const Color(0xFF4CAF50),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+
   Future<void> _exportPdf() async {
+    final isIOS = Platform.isIOS;
+
+    if (isIOS) {
+      setState(() => _loadingType = 'pdf');
+      try {
+        final txProvider = context.read<TransactionProvider>();
+        final exportService = ExportService();
+        final file = await exportService.exportToPdf(
+          transactions: txProvider.allTransactions,
+          month: _selectedMonth,
+          year: _selectedYear,
+        );
+        await exportService.sharePdf(file);
+        if (mounted) _showSnackbar('PDF berhasil di-export!');
+      } catch (e) {
+        if (mounted) _showSnackbar('Gagal export PDF: $e', isError: true);
+      } finally {
+        if (mounted) setState(() => _loadingType = null);
+      }
+      return;
+    }
+
+    final choice = await _showSaveOrShareDialog(context);
+    if (choice == null) return;
+
     setState(() => _loadingType = 'pdf');
 
     try {
       final txProvider = context.read<TransactionProvider>();
       final exportService = ExportService();
-
       final file = await exportService.exportToPdf(
         transactions: txProvider.allTransactions,
         month: _selectedMonth,
         year: _selectedYear,
       );
 
-      await exportService.sharePdf(file);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('PDF berhasil di-export!')),
-        );
+      if (choice == 'folder') {
+        final folderPath = await _pickFolder();
+        if (folderPath == null) {
+          if (mounted) setState(() => _loadingType = null);
+          return;
+        }
+        await exportService.savePdfToFolder(file, folderPath);
+        if (mounted) _showSnackbar('PDF disimpan ke folder yang dipilih!');
+      } else {
+        await exportService.sharePdf(file);
+        if (mounted) _showSnackbar('PDF berhasil di-export!');
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal export PDF: $e')),
-        );
-      }
+      if (mounted) _showSnackbar('Gagal export PDF: $e', isError: true);
     } finally {
-      if (mounted) {
-        setState(() => _loadingType = null);
-      }
+      if (mounted) setState(() => _loadingType = null);
     }
   }
 
   Future<void> _exportExcel() async {
+    final isIOS = Platform.isIOS;
+
+    if (isIOS) {
+      setState(() => _loadingType = 'excel');
+      try {
+        final txProvider = context.read<TransactionProvider>();
+        final exportService = ExportService();
+        final file = await exportService.exportToExcel(
+          transactions: txProvider.allTransactions,
+          month: _selectedMonth,
+          year: _selectedYear,
+        );
+        await exportService.shareExcel(file);
+        if (mounted) _showSnackbar('Excel berhasil di-export!');
+      } catch (e) {
+        if (mounted) _showSnackbar('Gagal export Excel: $e', isError: true);
+      } finally {
+        if (mounted) setState(() => _loadingType = null);
+      }
+      return;
+    }
+
+    final choice = await _showSaveOrShareDialog(context);
+    if (choice == null) return;
+
     setState(() => _loadingType = 'excel');
 
     try {
       final txProvider = context.read<TransactionProvider>();
       final exportService = ExportService();
-
       final file = await exportService.exportToExcel(
         transactions: txProvider.allTransactions,
         month: _selectedMonth,
         year: _selectedYear,
       );
 
-      await exportService.shareExcel(file);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Excel berhasil di-export!')),
-        );
+      if (choice == 'folder') {
+        final folderPath = await _pickFolder();
+        if (folderPath == null) {
+          if (mounted) setState(() => _loadingType = null);
+          return;
+        }
+        await exportService.saveExcelToFolder(file, folderPath);
+        if (mounted) _showSnackbar('Excel disimpan ke folder yang dipilih!');
+      } else {
+        await exportService.shareExcel(file);
+        if (mounted) _showSnackbar('Excel berhasil di-export!');
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal export Excel: $e')),
-        );
-      }
+      if (mounted) _showSnackbar('Gagal export Excel: $e', isError: true);
     } finally {
-      if (mounted) {
-        setState(() => _loadingType = null);
-      }
+      if (mounted) setState(() => _loadingType = null);
     }
   }
 }

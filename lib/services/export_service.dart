@@ -174,4 +174,16 @@ class ExportService {
   Future<void> shareExcel(File file) async {
     await Share.shareXFiles([XFile(file.path)]);
   }
+
+  Future<File> savePdfToFolder(File sourceFile, String targetFolderPath) async {
+    final fileName = 'UWANGKU_${sourceFile.path.split('/').last}';
+    final targetPath = '$targetFolderPath/$fileName';
+    return await sourceFile.copy(targetPath);
+  }
+
+  Future<File> saveExcelToFolder(File sourceFile, String targetFolderPath) async {
+    final fileName = 'UWANGKU_${sourceFile.path.split('/').last}';
+    final targetPath = '$targetFolderPath/$fileName';
+    return await sourceFile.copy(targetPath);
+  }
 }
