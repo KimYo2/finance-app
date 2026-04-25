@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-04-25
+
+### Added
+
+- **Usage Limit System** - Batas penggunaan fitur AI
+  - FREE: 10x AI text & 2x scan struk/hari
+  - PREMIUM: unlimited semua fitur
+  - Reset harian otomatis
+
+- **Receipt Scan Pro** - Scan struk/nota via OCR + AI
+  - Google ML Kit text recognition
+  - Groq Llama parsing untuk ekstrak item
+  - Preview & edit sebelum simpan
+  - Simpan sebagai 1 transaksi atau per item
+
+- **AI Summary & Recommendation** - Fitur AI Premium
+  - Ringkasan Mingguan naratif (7 hari)
+  - Saran Budget Personal berdasarkan data
+  - Groq Llama untuk analisis keuangan
+
+- **Export Data** - Export Premium
+  - PDF laporan keuangan per bulan
+  - CSV data transaksi
+
+- **Midtrans Payment** - Upgrade Premium
+  - WebView payment via Midtrans Snap
+  - Paket Bulanan (Rp 29.000) atau Lifetime (Rp 99.000)
+  - Integration dengan UsageProvider
+
+### Changed
+
+- Badge status FREE/PREMIUM di dashboard AppBar
+- Semua Premium gate navigasi ke UpgradeScreen
+
 ## [1.2.0] - 2026-04-25
 
 ### Changed

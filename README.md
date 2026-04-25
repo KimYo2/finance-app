@@ -14,6 +14,22 @@ Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flu
 - **OCR Scan** - Scan struk/nota via kamera (ML Kit text recognition)
 - **Cross-Platform** - Tampilan native untuk Android (Material) dan iOS (Cupertino)
 - **Offline Mode** - Bisa jalan tanpa internet menggunakan SQLite lokal
+- **Premium** - Unlimited AI, Export PDF/CSV (via Midtrans)
+
+## Fitur Premium
+
+- **AI Input Tanpa Batas** - Unlimited chat dengan AI
+- **Scan Struk Tanpa Batas** - Unlimited scan nota/struk
+- **Ringkasan Mingguan** - Analisis keuangan naratif via AI
+- **Saran Budget Personal** - Rekomendasi keuangan berdasarkan data
+- **Export PDF & CSV** - Download laporan keuangan
+
+### Upgrade Premium
+
+- **Bulanan**: Rp 29.000/bulan
+- **Lifetime**: Rp 99.000 (hemat 71%)
+
+Bayar via Midtrans Snap (WebView)
 
 ## Teknologi
 
@@ -22,9 +38,11 @@ Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flu
 - SQLite + PocketBase (dual storage)
 - fl_chart (charts)
 - intl (formatting mata uang Indonesia)
-- Google Generative AI (Groq Llama 3.1 8B)
+- Groq API (Llama 3.1 8B)
 - Google ML Kit Text Recognition (OCR)
 - Flutter Speech to Text
+- Midtrans Snap (payment)
+- Flutter WebView
 
 ## Struktur Proyek
 
@@ -33,23 +51,33 @@ lib/
 ├── main.dart                  # Entry point & routing
 ├── database/
 │   ├── db_interface.dart     # Abstract storage interface
-│   ├── pb_helper.dart         # PocketBase implementation
-│   └── sqlite_helper.dart     # SQLite implementation
+│   ├── pb_helper.dart        # PocketBase implementation
+│   └── sqlite_helper.dart   # SQLite implementation
 ├── models/
-│   └── transaction_model.dart
+│   ├── transaction_model.dart
+│   ├── usage_model.dart      # Usage limit tracking
+│   └── payment_model.dart    # Payment enums
 ├── providers/
 │   ├── transaction_provider.dart
-│   └── theme_provider.dart   # Dark mode management
+│   ├── theme_provider.dart  # Dark mode management
+│   └── usage_provider.dart  # Premium status & limits
 ├── screens/
 │   ├── dashboard_screen.dart
 │   ├── add_transaction_screen.dart
 │   ├── history_screen.dart
-│   ├── report_screen.dart
-│   └── ai_chat_screen.dart  # AI chat with voice & OCR
+│   ├── report_screen.dart    # Weekly summary (Premium)
+│   ├── ai_chat_screen.dart  # AI chat with voice & OCR
+│   ├── upgrade_screen.dart   # Premium upgrade UI
+│   ├── payment_webview_screen.dart  # Midtrans WebView
+│   ├── export_screen.dart  # PDF/CSV export (Premium)
+│   └── receipt_review_screen.dart  # Scan result review
 ├── services/
-│   ├── ai_service.dart      # Gemini AI integration
-│   ├── voice_service.dart   # Speech-to-text
-│   └── ocr_service.dart    # ML Kit text recognition
+│   ├── ai_service.dart     # Groq AI integration
+│   ├── voice_service.dart  # Speech-to-text
+│   ├── ocr_service.dart    # ML Kit text recognition
+│   ├── midtrans_service.dart  # Snap token generation
+│   ├── export_service.dart   # PDF/CSV export
+│   └── receipt_scan_service.dart  # Receipt OCR + AI
 ├── widgets/
 │   └── transaction_card.dart
 └── utils/
@@ -197,6 +225,20 @@ flutter build ios --release
 - iOS: 13.0+
 - SQLite: included (sqflite)
 - PocketBase: v0.21+ (optional for online mode)
+- Midtrans: for payment (optional, configure in .env)
+
+## Configuration
+
+Buat file `.env` di root project:
+
+```
+# Groq AI (wajib untuk AI features)
+GROQ_API_KEY=gsk_...
+
+# Midtrans (wajib untuk payment)
+MIDTRANS_SERVER_KEY=SB-Mid-server-xxxx
+MIDTRANS_BASE_URL=https://app.sandbox.midtrans.com/snap/v1/transactions
+```
 
 ## Lisensi
 
