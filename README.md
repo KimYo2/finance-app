@@ -9,7 +9,7 @@ Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flu
 - **Riwayat** - Lihat semua transaksi dengan filter (Semua/Pemasukan/Pengeluaran)
 - **Laporan** - Pie chart pengeluaran per kategori, bar chart 6 bulan terakhir
 - **Dark Mode** - Support tema gelap/terang dengan toggle di dashboard
-- **AI Chat** - Catat transaksi via chat natural language (Gemini 2.5 Flash)
+- **AI Chat** - Catat transaksi via chat natural language (Groq Llama 3.1)
 - **Voice Input** - Catat transaksi via suara (speech-to-text)
 - **OCR Scan** - Scan struk/nota via kamera (ML Kit text recognition)
 - **Cross-Platform** - Tampilan native untuk Android (Material) dan iOS (Cupertino)
@@ -22,7 +22,7 @@ Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flu
 - SQLite + PocketBase (dual storage)
 - fl_chart (charts)
 - intl (formatting mata uang Indonesia)
-- Google Generative AI (Gemini 2.5 Flash)
+- Google Generative AI (Groq Llama 3.1 8B)
 - Google ML Kit Text Recognition (OCR)
 - Flutter Speech to Text
 
@@ -81,16 +81,16 @@ provider.switchStorage(SqliteHelper());
 
 ## AI Chat Integration
 
-Aplikasi menggunakan **Gemini 2.5 Flash** untuk memproses input natural language:
+Aplikasi menggunakan **Groq Llama 3.1 8B** untuk memproses input natural language:
 
 1. **Setup API Key:**
-   - Buka: https://aistudio.google.com/app/apikey
-   - Login dengan Google Account
+   - Buka: https://console.groq.com/keys
+   - Login dengan Google/GitHub Account
    - Klik "Create API Key"
    - Copy ke file `.env`:
 
    ```
-   GEMINI_API_KEY=AIzaSy...
+   GROQ_API_KEY=gsk_...
    ```
 
 2. **Cara Penggunaan:**
@@ -169,7 +169,7 @@ Pastikan collections `transactions` dan `categories` sudah muncul.
 
 ```bash
 # Clone repo
-git clone https://github.com/KimYo2/finance-app.git
+git clone https://github.com/LunaeKim99/finance-app.git
 
 # Install dependencies
 flutter pub get

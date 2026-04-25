@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-04-25
+
+### Changed
+
+- **AI Chat Migration** - Switch dari Gemini ke Groq API
+  - Ganti provider: Google Gemini → Groq API
+  - Ganti model: llama-3.1-8b-instruct untuk rate limit lebih tinggi
+  - Lebih stabil untuk usage tinggi
+  - hapus .env dari git tracking
+
 ## [1.1.0] - 2026-04-24
 
 ### Added
