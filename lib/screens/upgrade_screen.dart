@@ -55,8 +55,18 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upgrade ke Premium'),
+        title: const Text(
+          'Upgrade ke Premium',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+        ),
         centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+        ),
       ),
       body: _buildContent(),
     );
@@ -66,22 +76,25 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
     final isIOS = Platform.isIOS;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Column(
         children: [
           if (AppConfig.isDemoBuild) ...[
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
-              color: Colors.orange.withOpacity(0.15),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+              ),
               child: const Row(
                 children: [
                   Icon(Icons.info_outline, color: Colors.orange, size: 16),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Demo Build — Semua fitur Premium sudah terbuka. '
-                      'Pembayaran menggunakan Midtrans Sandbox.',
+                      'Demo Build — Semua fitur Premium sudah terbuka.',
                       style: TextStyle(fontSize: 12, color: Colors.orange),
                     ),
                   ),
@@ -90,44 +103,76 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
             ),
             const SizedBox(height: 16),
           ],
-          const SizedBox(height: 16),
-          Image.asset(
-            'assets/images/logo.png',
-            height: 80,
-            width: 80,
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: const Color(0xFF4CAF50).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset(
+                'assets/images/logo.png',
+                fit: BoxFit.contain,
+              ),
+            ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           const Text(
             'Upgrade ke Premium',
             style: TextStyle(
-              fontSize: 28,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
+          const SizedBox(height: 6),
+          Text(
             'Nikmati semua fitur tanpa batasan',
             style: TextStyle(
-              color: Colors.grey,
+              color: Colors.grey.shade600,
+              fontSize: 14,
             ),
           ),
           const SizedBox(height: 32),
           _buildFeatureList(),
           const SizedBox(height: 32),
           _buildPlanSelector(isIOS),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           _buildPayButton(isIOS),
-          const SizedBox(height: 24),
-          const Text(
-            '🔒 Pembayaran aman via Midtrans',
-            style: TextStyle(color: Colors.grey),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.lock_outline_rounded,
+                size: 13,
+                color: Colors.grey.shade500,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Pembayaran aman via Midtrans',
+                style: TextStyle(
+                  color: Colors.grey.shade500,
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ),
           if (_isLoading) ...[
-            const SizedBox(height: 16),
-            if (_loadingMessage != null) Text(_loadingMessage!),
+            const SizedBox(height: 20),
+            if (_loadingMessage != null)
+              Text(
+                _loadingMessage!,
+                style: const TextStyle(color: Colors.grey),
+              ),
             const SizedBox(height: 8),
-            const CircularProgressIndicator(),
+            const CircularProgressIndicator(
+              color: Color(0xFF4CAF50),
+            ),
           ],
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -135,43 +180,121 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
 
   Widget _buildFeatureList() {
     final features = [
-      '✅ AI Input Tanpa Batas',
-      '✅ Scan Struk Tanpa Batas',
-      '✅ Ringkasan Keuangan AI',
-      '✅ Saran Budget Personal',
-      '✅ Export PDF & Excel',
+      (Icons.all_inclusive_rounded, 'AI Input Tanpa Batas',
+          'Catat transaksi dengan suara atau teks kapan saja'),
+      (Icons.document_scanner_rounded, 'Scan Struk Tanpa Batas',
+          'Foto struk belanja otomatis tercatat'),
+      (Icons.auto_awesome_rounded, 'Ringkasan Keuangan AI',
+          'Analisis cerdas pola pengeluaranmu'),
+      (Icons.savings_rounded, 'Saran Budget Personal',
+          'Tips hemat berdasarkan kebiasaanmu'),
+      (Icons.download_rounded, 'Export PDF & Excel',
+          'Unduh laporan keuangan kapan saja'),
     ];
 
-    return Column(
-      children: features
-          .map((f) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text(f, style: const TextStyle(fontSize: 14)),
-              ))
-          .toList(),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF4CAF50).withOpacity(0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF4CAF50).withOpacity(0.15),
+        ),
+      ),
+      child: Column(
+        children: features.map((feature) {
+          final (icon, title, subtitle) = feature;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4CAF50).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: const Color(0xFF4CAF50),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: Color(0xFF4CAF50),
+                  size: 18,
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
   Widget _buildPlanSelector(bool isIOS) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: _buildPlanCard(
-            PremiumPlan.monthly,
-            'Bulanan',
-            _currencyFormat.format(29000),
-            isIOS,
+        const Text(
+          'Pilih Paket',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildPlanCard(
-            PremiumPlan.yearly,
-            'Tahunan',
-            _currencyFormat.format(99000),
-            isIOS,
-            isPopular: true,
-          ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildPlanCard(
+                PremiumPlan.monthly,
+                'Bulanan',
+                _currencyFormat.format(29000),
+                '/bulan',
+                isIOS,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildPlanCard(
+                PremiumPlan.yearly,
+                'Tahunan',
+                _currencyFormat.format(99000),
+                '/tahun',
+                isIOS,
+                isPopular: true,
+                savingLabel: 'Hemat 71%',
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -181,51 +304,106 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
     PremiumPlan plan,
     String label,
     String price,
+    String period,
     bool isIOS, {
     bool isPopular = false,
+    String? savingLabel,
   }) {
     final isSelected = _selectedPlan == plan;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedPlan = plan),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? const Color(0xFF4CAF50) : Colors.grey.shade300,
+            color: isSelected
+                ? const Color(0xFF4CAF50)
+                : Colors.grey.shade300,
             width: isSelected ? 2 : 1,
           ),
-          borderRadius: BorderRadius.circular(12),
-          color: isSelected ? const Color(0xFF4CAF50).withOpacity(0.1) : null,
+          borderRadius: BorderRadius.circular(14),
+          color: isSelected
+              ? const Color(0xFF4CAF50).withOpacity(0.06)
+              : null,
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (isPopular)
+            if (isPopular && savingLabel != null)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                margin: const EdgeInsets.only(bottom: 8),
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3,
                 ),
-                child: const Text(
-                  'HEMAT 71%',
-                  style: TextStyle(
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4CAF50),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  savingLabel,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
+            Row(
+              children: [
+                Icon(
+                  isIOS
+                      ? CupertinoIcons.rosette
+                      : Icons.workspace_premium_rounded,
+                  size: 18,
+                  color: isSelected
+                      ? const Color(0xFF4CAF50)
+                      : Colors.grey,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: isSelected
+                        ? const Color(0xFF4CAF50)
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
             Text(
-              label,
+              price,
               style: TextStyle(
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: isSelected ? const Color(0xFF4CAF50) : null,
+                color: isSelected
+                    ? const Color(0xFF4CAF50)
+                    : null,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(price),
+            Text(
+              period,
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey.shade500,
+              ),
+            ),
+            if (isSelected)
+              Align(
+                alignment: Alignment.centerRight,
+                child: Icon(
+                  isIOS
+                      ? CupertinoIcons.checkmark_circle_fill
+                      : Icons.check_circle_rounded,
+                  color: const Color(0xFF4CAF50),
+                  size: 20,
+                ),
+              ),
           ],
         ),
       ),
@@ -235,31 +413,136 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
   Widget _buildPayButton(bool isIOS) {
     final price = _selectedPlan == PremiumPlan.monthly ? 29000 : 99000;
 
-    if (isIOS) {
-      return CupertinoButton(
-        color: const Color(0xFF4CAF50),
+    return SizedBox(
+      width: double.infinity,
+      height: 54,
+      child: ElevatedButton(
         onPressed: _isLoading ? null : () => _processPayment(price),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF4CAF50),
+          foregroundColor: Colors.white,
+          elevation: 2,
+          shadowColor: const Color(0xFF4CAF50).withOpacity(0.4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
         child: _isLoading
-            ? const CupertinoActivityIndicator()
-            : Text('Bayar ${_currencyFormat.format(price)}'),
-      );
-    }
-
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF4CAF50),
-        foregroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, 50),
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Colors.white,
+                ),
+              )
+            : Text(
+                'Bayar ${_currencyFormat.format(price)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.3,
+                ),
+              ),
       ),
-      onPressed: _isLoading ? null : () => _processPayment(price),
-      child: _isLoading
-          ? const CircularProgressIndicator(color: Colors.white)
-          : Text('Bayar ${_currencyFormat.format(price)}'),
     );
   }
 
-Future<void> _processPayment(int amount) async {
-    // Demo mode: directly upgrade without payment
+  Widget _buildAlreadyPremium(bool isIOS) {
+    final body = Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: const Color(0xFF4CAF50).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.workspace_premium_rounded,
+                size: 52,
+                color: Color(0xFF4CAF50),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Kamu sudah Premium! 🎉',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Nikmati semua fitur tanpa batasan',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
+              ),
+            ),
+            if (AppConfig.isDemoBuild) ...[
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.orange.withOpacity(0.3),
+                  ),
+                ),
+                child: const Text(
+                  'DEMO BUILD',
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+
+    if (isIOS) {
+      return CupertinoPageScaffold(
+        navigationBar: const CupertinoNavigationBar(
+          middle: Text('Premium'),
+        ),
+        child: SafeArea(child: body),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Premium',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+        ),
+      ),
+body: body,
+    );
+  }
+
+  Future<void> _processPayment(int amount) async {
     if (AppConfig.allFeaturesUnlocked) {
       setState(() {
         _isLoading = true;
@@ -282,7 +565,6 @@ Future<void> _processPayment(int amount) async {
       return;
     }
 
-    // Real payment when not in demo mode
     try {
       final midtrans = MidtransService();
 
@@ -312,7 +594,6 @@ Future<void> _processPayment(int amount) async {
         );
       }
     } catch (e) {
-      // Demo mode fallback
       final usageProvider = context.read<UsageProvider>();
       await usageProvider.upgradeToPremium();
 
@@ -333,104 +614,5 @@ Future<void> _processPayment(int amount) async {
         });
       }
     }
-  }
-
-  Widget _buildAlreadyPremium(bool isIOS) {
-    if (isIOS) {
-      return CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
-          middle: Text('Premium'),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  CupertinoIcons.checkmark_seal_fill,
-                  size: 80,
-                  color: Colors.amber,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Kamu sudah Premium!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text('Nikmati semua fitur tanpa batasan'),
-                if (AppConfig.isDemoBuild) ...[
-                  SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'DEMO BUILD',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Premium'),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.verified_user,
-              size: 80,
-              color: Colors.amber,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Kamu sudah Premium!',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text('Nikmati semua fitur tanpa batasan'),
-            if (AppConfig.isDemoBuild) ...[
-              SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'DEMO BUILD',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
   }
 }

@@ -228,31 +228,67 @@ class _ExportScreenState extends State<ExportScreen> {
   }
 
   Widget _buildPremiumGate() {
-    return Card(
-      color: Colors.amber.shade50,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.lock, color: Colors.amber),
-                SizedBox(width: 8),
-                Text(
-                  'Fitur Premium',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF4CAF50).withOpacity(0.08),
+            const Color(0xFF4CAF50).withOpacity(0.03),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF4CAF50).withOpacity(0.25),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4CAF50).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Export data hanya tersedia untuk pengguna Premium.',
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(
+                child: const Icon(
+                  Icons.workspace_premium_rounded,
+                  color: Color(0xFF4CAF50),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Fitur Premium',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  Text(
+                    'Export data tersedia untuk pengguna Premium',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
@@ -260,12 +296,21 @@ class _ExportScreenState extends State<ExportScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber,
+                backgroundColor: const Color(0xFF4CAF50),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              child: const Text('Upgrade ke Premium'),
+              child: const Text(
+                'Upgrade ke Premium',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
