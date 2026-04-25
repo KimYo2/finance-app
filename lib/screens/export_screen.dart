@@ -9,6 +9,7 @@ import '../providers/transaction_provider.dart';
 import '../providers/usage_provider.dart';
 import '../services/export_service.dart';
 import 'upgrade_screen.dart';
+import 'import_screen.dart';
 
 class ExportScreen extends StatefulWidget {
   const ExportScreen({super.key});
@@ -32,7 +33,7 @@ class _ExportScreenState extends State<ExportScreen> {
     if (isIOS) {
       return CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
-          middle: const Text('Export Data'),
+          middle: const Text('Import & Export Data'),
           leading: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () => Navigator.pop(context),
@@ -45,7 +46,7 @@ class _ExportScreenState extends State<ExportScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Export Data'),
+        title: const Text('Import & Export Data'),
         centerTitle: true,
       ),
       body: _buildContent(),
@@ -68,6 +69,40 @@ class _ExportScreenState extends State<ExportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ImportScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.upload_file_rounded, size: 20),
+                  label: const Text('Import'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF4CAF50),
+                    side: const BorderSide(color: Color(0xFF4CAF50)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: null,
+                  icon: const Icon(Icons.download_rounded, size: 20),
+                  label: const Text('Export'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4CAF50),
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
           Text(
             'Pilih Periode',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(

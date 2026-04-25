@@ -70,6 +70,11 @@ class UsageProvider extends ChangeNotifier {
     return _usage.isPremium || _usage.aiPhotoUsedToday < 2;
   }
 
+  bool canImport() {
+    if (AppConfig.allFeaturesUnlocked) return true;
+    return _usage.isPremium;
+  }
+
   Future<void> incrementAiText() async {
     if (_usage.isPremium) return;
 
