@@ -30,7 +30,7 @@ class AiService {
   String? get lastError => _lastError;
 
   static const String _systemPrompt = '''
-Kamu adalah asisten keuangan pribadi yang cerdas dalam aplikasi Personal Finance.
+Kamu adalah asisten keuangan pribadi yang cerdas dalam aplikasi UWANGKU.
 Tugasmu adalah membantu pengguna mencatat transaksi keuangan dari percakapan natural.
 
 KEMAMPUANMU:

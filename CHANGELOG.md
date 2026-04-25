@@ -28,7 +28,7 @@ All notable changes to this project will be documented in this file.
 
 - **Midtrans Payment** - Upgrade Premium
   - WebView payment via Midtrans Snap
-  - Paket Bulanan (Rp 29.000) atau Lifetime (Rp 99.000)
+  - Paket Bulanan (Rp 29.000) atau Tahunan (Rp 99.000/tahun)
   - Integration dengan UsageProvider
 
 ### Changed

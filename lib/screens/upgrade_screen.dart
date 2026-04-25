@@ -132,10 +132,10 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
       child: Column(
         children: [
           const SizedBox(height: 16),
-          Icon(
-            isIOS ? CupertinoIcons.star_fill : Icons.star,
-            size: 80,
-            color: Colors.amber,
+          Image.asset(
+            'assets/images/logo-uwangku.png',
+            height: 80,
+            width: 80,
           ),
           const SizedBox(height: 24),
           const Text(
@@ -194,7 +194,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
 
   Widget _buildPlanSelector(bool isIOS) {
     final monthlyPrice = MidtransService.planPrices[PremiumPlan.monthly]!;
-    final lifetimePrice = MidtransService.planPrices[PremiumPlan.lifetime]!;
+    final lifetimePrice = MidtransService.planPrices[PremiumPlan.yearly]!;
 
     return Column(
       children: [
@@ -256,17 +256,17 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
           ),
         ),
         GestureDetector(
-          onTap: () => setState(() => _selectedPlan = PremiumPlan.lifetime),
+          onTap: () => setState(() => _selectedPlan = PremiumPlan.yearly),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _selectedPlan == PremiumPlan.lifetime
+              color: _selectedPlan == PremiumPlan.yearly
                   ? Theme.of(context).colorScheme.primaryContainer
                   : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _selectedPlan == PremiumPlan.lifetime
+                color: _selectedPlan == PremiumPlan.yearly
                     ? Theme.of(context).colorScheme.primary
                     : Colors.transparent,
                 width: 2,
@@ -276,7 +276,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
               children: [
                 Icon(
                   Icons.emoji_events,
-                  color: _selectedPlan == PremiumPlan.lifetime
+                  color: _selectedPlan == PremiumPlan.yearly
                       ? Theme.of(context).colorScheme.primary
                       : Colors.grey,
                 ),
@@ -285,12 +285,35 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Premium Seumur Hidup',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                      Row(
+                        children: [
+                          const Text(
+                            'Premium Tahunan',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'TERPOPULER',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       Row(
                         children: [
@@ -324,7 +347,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                     ],
                   ),
                 ),
-                if (_selectedPlan == PremiumPlan.lifetime)
+                if (_selectedPlan == PremiumPlan.yearly)
                   Icon(
                     Icons.check_circle,
                     color: Theme.of(context).colorScheme.primary,
@@ -419,8 +442,8 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
       final snapToken = await midtransService.createSnapToken(
         orderId: orderId,
         amount: amount,
-        customerName: 'Pengguna Finance App',
-        customerEmail: 'user@financeapp.com',
+        customerName: 'Pengguna UWANGKU',
+        customerEmail: 'user@uwangku.com',
       );
 
       if (mounted) {

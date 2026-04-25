@@ -1,5 +1,5 @@
-name: finance_app
-description: "Personal Finance App - Pencatatan Pengeluaran & Pemasukan Harian"
+name: uwangku
+description: "UWANGKU - Asisten Keuangan Pribadi Berbasis AI"
 publish_to: "none"
 
 version: 1.0.0+1
@@ -45,3 +45,4 @@ flutter:
   uses-material-design: true
   assets:
     - .env
+    - assets/images/

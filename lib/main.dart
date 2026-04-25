@@ -10,6 +10,7 @@ import 'providers/transaction_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/usage_provider.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/splash_screen.dart';
 import 'screens/add_transaction_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/report_screen.dart';
@@ -73,13 +74,13 @@ class FinanceApp extends StatelessWidget {
                 GlobalCupertinoLocalizations.delegate,
               ],
               supportedLocales: const [Locale('id', 'ID')],
-              home: const AppShell(),
+              home: const SplashScreen(),
             );
           }
 
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            title: 'Personal Finance',
+            title: 'UWANGKU',
             themeMode: themeProvider.themeMode,
             theme: ThemeData(
               useMaterial3: true,
@@ -105,7 +106,7 @@ class FinanceApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
             supportedLocales: const [Locale('id', 'ID')],
-            home: const AppShell(),
+            home: const SplashScreen(),
           );
         },
       ),
@@ -246,13 +247,13 @@ class _AppShellState extends State<AppShell> {
   String _getTitle(int index) {
     switch (index) {
       case 0:
-        return 'Personal Finance';
+        return 'UWANGKU';
       case 1:
         return 'Riwayat Transaksi';
       case 2:
         return 'Laporan';
       default:
-        return 'Personal Finance';
+        return 'UWANGKU';
     }
   }
 }

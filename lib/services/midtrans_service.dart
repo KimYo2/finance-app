@@ -61,7 +61,7 @@ class MidtransService {
               'id': 'PREMIUM_PLAN',
               'price': amount.toInt(),
               'quantity': 1,
-              'name': 'Finance App Premium',
+              'name': 'UWANGKU Premium',
             }
           ],
         }),
@@ -106,11 +106,11 @@ class MidtransService {
 
   static const Map<PremiumPlan, int> planPrices = {
     PremiumPlan.monthly: 29000,
-    PremiumPlan.lifetime: 99000,
+    PremiumPlan.yearly: 99000,
   };
 
   static const Map<PremiumPlan, String> planNames = {
     PremiumPlan.monthly: 'Premium Bulanan',
-    PremiumPlan.lifetime: 'Premium Seumur Hidup',
+    PremiumPlan.yearly: 'Premium Tahunan',
   };
 }

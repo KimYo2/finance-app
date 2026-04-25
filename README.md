@@ -1,6 +1,6 @@
-# Personal Finance App
+# UWANGKU
 
-Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flutter dengan dukungan penuh untuk Android dan iOS.
+Aplikasi Asisten Keuangan Pribadi Berbasis AI menggunakan Flutter dengan dukungan penuh untuk Android dan iOS.
 
 ## Fitur
 
@@ -27,7 +27,7 @@ Aplikasi Pencatatan Pengeluaran & Pemasukan Harian (Finance App) menggunakan Flu
 ### Upgrade Premium
 
 - **Bulanan**: Rp 29.000/bulan
-- **Lifetime**: Rp 99.000 (hemat 71%)
+- **Tahunan**: Rp 99.000/tahun (hemat 71%)
 
 Bayar via Midtrans Snap (WebView)
 

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:finance_app/main.dart';
+import 'package:uwangku/main.dart';
 
 void main() {
   testWidgets('Finance app loads', (WidgetTester tester) async {

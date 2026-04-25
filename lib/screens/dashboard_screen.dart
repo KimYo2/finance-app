@@ -277,7 +277,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (isIOS) {
           return CupertinoPageScaffold(
             navigationBar: const CupertinoNavigationBar(
-              middle: Text('Personal Finance'),
+              middle: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image(image: AssetImage('assets/images/logo-uwangku.png'), height: 24, width: 24),
+                  SizedBox(width: 8),
+                  Text('UWANGKU'),
+                ],
+              ),
             ),
             child: SafeArea(child: body),
           );
@@ -285,7 +292,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Personal Finance'),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image(image: AssetImage('assets/images/logo-uwangku.png'), height: 24, width: 24),
+                const SizedBox(width: 8),
+                const Text('UWANGKU'),
+              ],
+            ),
             centerTitle: true,
             actions: [
               Consumer<UsageProvider>(

@@ -1,6 +1,6 @@
 enum PaymentStatus { pending, success, failed, cancelled }
 
-enum PremiumPlan { monthly, lifetime }
+enum PremiumPlan { monthly, yearly }
 
 class PaymentModel {
   final String orderId;
