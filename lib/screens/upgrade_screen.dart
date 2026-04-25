@@ -133,7 +133,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
         children: [
           const SizedBox(height: 16),
           Image.asset(
-            'assets/images/logo_uwangku.png',
+            'assets/images/logo.png',
             height: 80,
             width: 80,
           ),
