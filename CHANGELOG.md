@@ -49,6 +49,22 @@ All notable changes to this project will be documented in this file.
 
 - **AI Chat Fix** - Remove close button from AppBar
 
+- **Export Save to Folder** - Pilihan simpan atau share file export
+  - Bottom sheet dialog: Simpan ke Folder / Bagikan
+  - Save to Folder via FilePicker
+  - File命名为 UWANGKU_[filename]
+  - iOS: langsung share tanpa dialog
+
+- **Report Daily Summary** - Ringkasan transaksi hari ini (FREE)
+  - Total pemasukan & pengeluaran hari ini
+  - List transaksi hari ini (max 5 item)
+  - Empty state message
+
+- **Report Monthly AI Summary** - Analisis naratif bulanan (Premium)
+  - AI-generated monthly analysis via Groq
+  - Rebuild saat bulan berubah
+  - Premium gate dengan upgrade button
+
 ## [1.3.0] - 2026-04-25
 
 ### Added

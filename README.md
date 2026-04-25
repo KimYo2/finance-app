@@ -7,7 +7,7 @@ Aplikasi Asisten Keuangan Pribadi Berbasis AI menggunakan Flutter dengan dukunga
 - **Dashboard** - Menampilkan saldo total, pemasukan & pengeluaran bulan ini
 - **Tambah Transaksi** - Input transaksi dengan kategori, nominal, tanggal, dan catatan
 - **Riwayat** - Lihat semua transaksi dengan filter (Semua/Pemasukan/Pengeluaran)
-- **Laporan** - Pie chart pengeluaran per kategori, bar chart 6 bulan terakhir
+- **Laporan** - Pie chart pengeluaran per kategori, bar chart 6 bulan terakhir, ringkasan harian
 - **Dark Mode** - Support tema gelap/terang dengan toggle di dashboard
 - **AI Chat** - Catat transaksi via chat natural language (Groq Llama 3.1)
 - **Voice Input** - Catat transaksi via suara (speech-to-text)
@@ -25,8 +25,9 @@ Aplikasi Asisten Keuangan Pribadi Berbasis AI menggunakan Flutter dengan dukunga
 - **Scan Struk Tanpa Batas** - Unlimited scan nota/struk
 - **Ringkasan Mingguan** - Analisis keuangan naratif via AI
 - **Saran Budget Personal** - Rekomendasi keuangan berdasarkan data
-- **Export PDF & CSV** - Download laporan keuangan
+- **Export PDF & CSV** - Download laporan keuangan (Save ke Folder atau Share)
 - **Import Data** - Import transaksi dari CSV/Excel
+- **Ringkasan Bulanan AI** - Analisis keuangan naratif bulanan via AI
 
 ### Upgrade Premium
 
