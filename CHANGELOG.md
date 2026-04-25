@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-04-25
+
+### Changed
+
+- **AddTransactionScreen UI Revamp** - Modern Minimal design
+  - Layout baru: top section (nominal besar) + scrollable detail
+  - Nominal besar di tengah seperti kalkulator (42px bold)
+  - Type selector: pill toggle dengan shadow halus
+  - Form rows: underline style (Material 3) - tidak ada outline box
+  - Accent color: merah untuk pengeluaran, hijau untuk pemasukan
+  - AnimatedContainer animate saat toggle tipe
+  - AppBar transparan dengan delete button (edit mode)
+  - Dark mode support
+
 ## [1.4.0] - 2026-04-25
 
 ### Added
