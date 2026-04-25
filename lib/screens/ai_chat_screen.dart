@@ -400,44 +400,79 @@ class _AiChatScreenState extends State<AiChatScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.smart_toy, size: 24),
-            SizedBox(width: 8),
-            Text('Asisten Keuangan'),
-            SizedBox(width: 8),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: const Color(0xFF4CAF50).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.auto_awesome_rounded,
+                size: 18,
+                color: Color(0xFF4CAF50),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Asisten Keuangan',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+              ),
+            ),
+            const SizedBox(width: 8),
             Consumer<UsageProvider>(
               builder: (context, usageProvider, _) {
                 if (usageProvider.isPremium) {
                   return Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.amber,
+                      color: const Color(0xFF4CAF50),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
+                    child: const Text(
                       'PREMIUM',
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   );
                 }
                 return Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
+                    color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    'Sisa: ${usageProvider.remainingAiText}/10',
-                    style: TextStyle(fontSize: 10),
+                    '${usageProvider.remainingAiText}/10',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                 );
               },
             ),
           ],
         ),
-        centerTitle: false,
       ),
       body: Column(
         children: [
@@ -556,6 +591,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
     if (message.pendingTransaction != null) {
       final transaction = message.pendingTransaction!;
       final isIncome = transaction.type == 'income';
+      final txColor = isIncome ? const Color(0xFF4CAF50) : Colors.red;
+
       return Align(
         alignment: Alignment.centerLeft,
         child: Container(
@@ -564,34 +601,49 @@ class _AiChatScreenState extends State<AiChatScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: isIncome ? AppTheme.lightGreen : AppTheme.lightRed,
-                  borderRadius: BorderRadius.circular(12),
+                  color: txColor.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: isIncome ? AppTheme.primaryGreen : Colors.orange,
+                    color: txColor.withOpacity(0.3),
+                    width: 1.5,
                   ),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-                      color: isIncome ? AppTheme.primaryGreen : Colors.orange,
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: txColor.withOpacity(0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isIncome
+                            ? Icons.arrow_downward_rounded
+                            : Icons.arrow_upward_rounded,
+                        color: txColor,
+                        size: 18,
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           transaction.category,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
                         ),
+                        const SizedBox(height: 2),
                         Text(
                           currencyFormat.format(transaction.amount),
                           style: TextStyle(
-                            color: isIncome
-                                ? AppTheme.primaryGreen
-                                : Colors.orange[700],
+                            color: txColor,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -599,9 +651,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         Text(
                           dateFormat.format(transaction.date),
                           style: TextStyle(
-                            color: isDark
-                                ? AppTheme.darkTextSecondary
-                                : AppTheme.textSecondary,
+                            color: Colors.grey.shade500,
                             fontSize: 12,
                           ),
                         ),
@@ -611,11 +661,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 ),
               ),
               if (message.text.isNotEmpty) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDark ? AppTheme.darkCard : Colors.grey[100],
+                    color: isDark ? AppTheme.darkCard : Colors.grey,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(message.text),
@@ -627,23 +680,34 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => _cancelTransaction(index),
-                      icon: const Icon(Icons.close, size: 18),
+                      icon: const Icon(Icons.close_rounded, size: 16),
                       label: const Text('Batal'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.red,
+                        side: BorderSide(
+                          color: Colors.red.withOpacity(0.4),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () =>
-                          _confirmTransaction(transaction, index),
-                      icon: const Icon(Icons.check, size: 18),
+                      onPressed: () => _confirmTransaction(transaction, index),
+                      icon: const Icon(Icons.check_rounded, size: 16),
                       label: const Text('Simpan'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryGreen,
+                        backgroundColor: const Color(0xFF4CAF50),
                         foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
                     ),
                   ),
@@ -702,25 +766,40 @@ class _AiChatScreenState extends State<AiChatScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: isDark ? AppTheme.darkCard : Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, -3),
           ),
         ],
       ),
       child: SafeArea(
         child: Row(
           children: [
-            IconButton(
-              icon: const Icon(Icons.document_scanner_outlined),
-              onPressed: _scanImage,
-              tooltip: 'Scan struk',
+            // Scan button
+            GestureDetector(
+              onTap: _scanImage,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4CAF50).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.document_scanner_rounded,
+                  color: Color(0xFF4CAF50),
+                  size: 20,
+                ),
+              ),
             ),
+            const SizedBox(width: 8),
+
+            // Text input
             Expanded(
               child: TextField(
                 controller: _textController,
@@ -728,44 +807,79 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   hintText: _isListening
                       ? 'Mendengarkan...'
                       : 'Ceritakan transaksimu...',
+                  hintStyle: TextStyle(
+                    color: _isListening ? Colors.red : Colors.grey.shade400,
+                    fontSize: 14,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: isDark ? AppTheme.darkCardBorder : Colors.grey[100],
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  fillColor: isDark
+                      ? AppTheme.darkCardBorder
+                      : Colors.grey.shade100,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  isDense: true,
                 ),
                 onSubmitted: (text) {
                   if (text.isNotEmpty) _sendTextMessage(text);
                 },
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 8),
+
+            // Mic button
             GestureDetector(
               onLongPressStart: (_) => _startVoiceInput(),
               onLongPressEnd: (_) => _stopVoiceInput(),
-              child: Container(
-                padding: const EdgeInsets.all(10),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: _isListening ? Colors.red : AppTheme.primaryGreen,
+                  color: _isListening ? Colors.red : const Color(0xFF4CAF50),
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: (_isListening ? Colors.red : const Color(0xFF4CAF50))
+                          .withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Icon(
-                  _isListening ? Icons.stop : Icons.mic,
+                  _isListening ? Icons.stop_rounded : Icons.mic_rounded,
                   color: Colors.white,
                   size: 20,
                 ),
               ),
             ),
             const SizedBox(width: 4),
-            IconButton(
-              icon: Icon(Icons.send_rounded, color: AppTheme.primaryGreen),
-              onPressed: () {
+
+            // Send button
+            GestureDetector(
+              onTap: () {
                 final text = _textController.text.trim();
                 if (text.isNotEmpty) _sendTextMessage(text);
               },
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4CAF50),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.send_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ),
             ),
           ],
         ),
