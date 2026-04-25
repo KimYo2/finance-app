@@ -26,6 +26,7 @@ Aplikasi Asisten Keuangan Pribadi Berbasis AI menggunakan Flutter dengan dukunga
 - **Ringkasan Mingguan** - Analisis keuangan naratif via AI
 - **Saran Budget Personal** - Rekomendasi keuangan berdasarkan data
 - **Export PDF & CSV** - Download laporan keuangan
+- **Import Data** - Import transaksi dari CSV/Excel
 
 ### Upgrade Premium
 

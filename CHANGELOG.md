@@ -35,6 +35,20 @@ All notable changes to this project will be documented in this file.
 - Hapus duplicate logo files
 - Update semua Image.asset references
 
+- **Demo Build Config** - All premium features unlocked for testing
+  - AppConfig.isDemoBuild flag
+  - DEMO badge in AppBar
+  - Premium gate bypass for testing
+
+- **Import Data** - Import transaksi dari CSV/Excel
+  - Parse CSV dan Excel (.xlsx)
+  - Premium-only feature
+  - Download template CSV
+  - Preview hasil import (sukses/gagal)
+  - Error handling per baris
+
+- **AI Chat Fix** - Remove close button from AppBar
+
 ## [1.3.0] - 2026-04-25
 
 ### Added
