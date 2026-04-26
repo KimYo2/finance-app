@@ -34,6 +34,8 @@ All notable changes to this project will be documented in this file.
 - Pie chart container color in dark mode
 - Bar chart bottomTitles showTitles parameter
 
+## [1.5.0] - 2026-04-25
+
 ### Changed
 
 - **AddTransactionScreen UI Revamp** - Modern Minimal design
