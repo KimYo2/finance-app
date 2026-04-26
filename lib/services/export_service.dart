@@ -8,6 +8,7 @@ import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../models/transaction_model.dart';
+import '../models/transaction_type.dart';
 
 class ExportService {
   final _currencyFormat = NumberFormat.currency(
@@ -32,7 +33,7 @@ class ExportService {
     double totalExpense = 0;
 
     for (final tx in filteredTx) {
-      if (tx.type == 'income') {
+      if (tx.type == TransactionType.income) {
         totalIncome += tx.amount;
       } else {
         totalExpense += tx.amount;
@@ -121,8 +122,8 @@ class ExportService {
               _dateFormat.format(tx.date),
               tx.title,
               tx.category,
-              tx.type == 'income' ? _currencyFormat.format(tx.amount) : '-',
-              tx.type == 'expense' ? _currencyFormat.format(tx.amount) : '-',
+              tx.type == TransactionType.income ? _currencyFormat.format(tx.amount) : '-',
+              tx.type == TransactionType.expense ? _currencyFormat.format(tx.amount) : '-',
             ]).toList(),
             headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
             cellAlignment: pw.Alignment.centerLeft,
@@ -155,7 +156,7 @@ class ExportService {
     for (var i = 0; i < filteredTx.length; i++) {
       final tx = filteredTx[i];
       final row = i + 1;
-      final tipe = tx.type == 'income' ? 'Pemasukan' : 'Pengeluaran';
+      final tipe = tx.type == TransactionType.income ? 'Pemasukan' : 'Pengeluaran';
       buffer.writeln('$row,${_dateFormat.format(tx.date)},${tx.title},${tx.category},$tipe,${tx.amount},${tx.note}');
     }
 

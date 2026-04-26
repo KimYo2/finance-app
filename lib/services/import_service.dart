@@ -3,6 +3,7 @@ import 'package:csv/csv.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import '../models/transaction_model.dart';
+import '../models/transaction_type.dart';
 
 enum ImportFormat { csv, excel }
 
@@ -158,7 +159,7 @@ class ImportService {
 
       final typeStr = row[1].toString().trim().toLowerCase();
       final isExpense = typeStr == 'pengeluaran' || typeStr == 'expense' || typeStr == 'keluar';
-      final type = isExpense ? 'expense' : 'income';
+      final type = isExpense ? TransactionType.expense : TransactionType.income;
 
       final categoryName = row[2].toString().trim();
       final category = categoryName.isEmpty ? 'Lainnya' : categoryName;

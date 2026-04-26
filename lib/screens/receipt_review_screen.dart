@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../models/receipt_scan_result.dart';
 import '../models/transaction_model.dart';
+import '../models/transaction_type.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/usage_provider.dart';
 
@@ -385,7 +386,7 @@ class _ReceiptReviewScreenState extends State<ReceiptReviewScreen> {
               ? widget.scanResult.merchant
               : ' Pembelian',
           amount: total,
-          type: 'expense',
+          type: TransactionType.expense,
           category: _items.isNotEmpty ? _items.first.category : 'Lainnya',
           date: widget.scanResult.date ?? DateTime.now(),
           note: 'Dari scan struk',
@@ -396,7 +397,7 @@ class _ReceiptReviewScreenState extends State<ReceiptReviewScreen> {
           final transaction = TransactionModel(
             title: item.name,
             amount: item.price,
-            type: 'expense',
+            type: TransactionType.expense,
             category: item.category,
             date: widget.scanResult.date ?? DateTime.now(),
             note: 'Dari scan struk',

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction_model.dart';
+import '../models/transaction_type.dart';
 import '../providers/transaction_provider.dart';
 import '../screens/add_transaction_screen.dart';
 import '../widgets/transaction_card.dart';
@@ -187,10 +188,10 @@ Widget _buildAndroid(List<TransactionModel> transactions, TransactionProvider pr
     );
 
     final totalIncome = transactions
-        .where((t) => t.type == 'income')
+        .where((t) => t.type == TransactionType.income)
         .fold<double>(0, (s, t) => s + t.amount);
     final totalExpense = transactions
-        .where((t) => t.type == 'expense')
+        .where((t) => t.type == TransactionType.expense)
         .fold<double>(0, (s, t) => s + t.amount);
 
     if (_selectedTab == 1) {
@@ -585,9 +586,9 @@ Widget _buildAndroid(List<TransactionModel> transactions, TransactionProvider pr
   List<TransactionModel> _getFilteredTransactions(List<TransactionModel> transactions) {
     switch (_selectedTab) {
       case 1:
-        return transactions.where((t) => t.type == 'income').toList();
+        return transactions.where((t) => t.type == TransactionType.income).toList();
       case 2:
-        return transactions.where((t) => t.type == 'expense').toList();
+        return transactions.where((t) => t.type == TransactionType.expense).toList();
       default:
         return transactions;
     }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction_model.dart';
+import '../models/transaction_type.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/usage_provider.dart';
 import '../services/receipt_scan_service.dart';
@@ -28,7 +29,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _noteController = TextEditingController();
   final _amountFocusNode = FocusNode();
 
-  String _transactionType = 'expense';
+  TransactionType _transactionType = TransactionType.expense;
   String _selectedCategory = 'Makanan';
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
@@ -79,7 +80,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   List<String> get _currentCategories =>
-      _transactionType == 'expense' ? _expenseCategories : _incomeCategories;
+      _transactionType == TransactionType.expense ? _expenseCategories : _incomeCategories;
 
   String _formatNumberWithDot(String text) {
     final cleanText = text.replaceAll(RegExp(r'[^\d]'), '');
@@ -161,7 +162,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _buildForm() {
-    final isExpense = _transactionType == 'expense';
+    final isExpense = _transactionType == TransactionType.expense;
     final accentColor = isExpense ? Colors.red : const Color(0xFF4CAF50);
 
     return Form(
@@ -275,7 +276,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _buildTypeSelector() {
-    final isExpense = _transactionType == 'expense';
+    final isExpense = _transactionType == TransactionType.expense;
     final isIOS = Platform.isIOS;
 
     return Container(
@@ -293,7 +294,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             selectedColor: Colors.red,
             icon: isIOS ? CupertinoIcons.arrow_up_circle_fill : Icons.arrow_upward_rounded,
             onTap: () => setState(() {
-              _transactionType = 'expense';
+              _transactionType = TransactionType.expense;
               _selectedCategory = _expenseCategories.first;
             }),
           ),
@@ -303,7 +304,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             selectedColor: const Color(0xFF4CAF50),
             icon: isIOS ? CupertinoIcons.arrow_down_circle_fill : Icons.arrow_downward_rounded,
             onTap: () => setState(() {
-              _transactionType = 'income';
+              _transactionType = TransactionType.income;
               _selectedCategory = _incomeCategories.first;
             }),
           ),
@@ -451,7 +452,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   leading: Icon(
                     _getCategoryIcon(category),
                     color: isSelected
-                        ? (_transactionType == 'expense'
+                        ? (_transactionType == TransactionType.expense
                             ? Colors.red
                             : const Color(0xFF4CAF50))
                         : Colors.grey,
@@ -463,7 +464,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           ? FontWeight.bold
                           : FontWeight.normal,
                       color: isSelected
-                          ? (_transactionType == 'expense'
+                          ? (_transactionType == TransactionType.expense
                               ? Colors.red
                               : const Color(0xFF4CAF50))
                           : null,
@@ -472,9 +473,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   trailing: isSelected
                       ? Icon(
                           Icons.check,
-                          color: _transactionType == 'expense'
-                              ? Colors.red
-                              : const Color(0xFF4CAF50),
+color: _transactionType == TransactionType.expense
+                                ? Colors.red
+                                : const Color(0xFF4CAF50),
                         )
                       : null,
                   onTap: () {
@@ -798,7 +799,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _buildSubmitButton() {
-    final isExpense = _transactionType == 'expense';
+    final isExpense = _transactionType == TransactionType.expense;
     final accentColor = isExpense ? Colors.red : const Color(0xFF4CAF50);
     final isValid = _amountController.text.isNotEmpty;
 

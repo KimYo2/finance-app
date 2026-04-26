@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:pocketbase/pocketbase.dart';
 import '../models/transaction_model.dart';
+import '../models/transaction_type.dart';
 import '../models/asset_model.dart';
 import '../models/debt_model.dart';
 import '../models/budget_model.dart';
@@ -55,7 +56,7 @@ class PbHelper {
       id: record.id,
       title: record.data['title'] as String,
       amount: (record.data['amount'] as num).toDouble(),
-      type: record.data['type'] as String,
+      type: TransactionType.fromString(record.data['type'] as String),
       category: record.data['category'] as String,
       date: DateTime.parse(record.data['date'] as String),
       note: (record.data['note'] as String?) ?? '',

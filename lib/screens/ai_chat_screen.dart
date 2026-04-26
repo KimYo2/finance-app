@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction_model.dart';
+import '../models/transaction_type.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/usage_provider.dart';
 import '../services/ai_service.dart';
@@ -590,7 +591,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
     if (message.pendingTransaction != null) {
       final transaction = message.pendingTransaction!;
-      final isIncome = transaction.type == 'income';
+      final isIncome = transaction.type == TransactionType.income;
       final txColor = isIncome ? const Color(0xFF4CAF50) : Colors.red;
 
       return Align(

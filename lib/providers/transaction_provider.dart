@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../database/db_interface.dart';
 import '../database/sqlite_helper.dart';
 import '../models/transaction_model.dart';
+import '../models/transaction_type.dart';
 
 class TransactionProvider extends ChangeNotifier {
   DbInterface _dbHelper = SqliteHelper();
@@ -11,6 +12,9 @@ class TransactionProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isOnline = true;
+
+  void Function(String message)? onError;
+  void Function(String message)? onSuccess;
 
   List<TransactionModel> get allTransactions => _transactions;
   bool get isLoading => _isLoading;
@@ -33,18 +37,32 @@ class TransactionProvider extends ChangeNotifier {
     initialize();
   }
 
-  Future<void> loadTransactions() async {
-    if (_dbHelper is! SqliteHelper) {
-      await checkConnectivity();
-      if (!_isOnline) {
-        _errorMessage = 'Tidak ada koneksi internet';
-        _isLoading = false;
-        notifyListeners();
-        return;
-      }
-    } else {
+  Future<bool> _requiresOnline() async {
+    if (_dbHelper is SqliteHelper) {
       _isOnline = true;
+      return true;
     }
+    await checkConnectivity();
+    if (!_isOnline) {
+      _setError('Tidak ada koneksi internet');
+      return false;
+    }
+    return true;
+  }
+
+  void _setError(String message) {
+    _errorMessage = message;
+    onError?.call(message);
+    notifyListeners();
+  }
+
+  void _setSuccess(String message) {
+    onSuccess?.call(message);
+    notifyListeners();
+  }
+
+  Future<void> loadTransactions() async {
+    if (!await _requiresOnline()) return;
 
     _isLoading = true;
     _errorMessage = null;
@@ -53,7 +71,7 @@ class TransactionProvider extends ChangeNotifier {
     try {
       _transactions = await _dbHelper.fetchAllTransactions();
     } catch (e) {
-      _errorMessage = e.toString();
+      _setError(e.toString());
       debugPrint('Error loading transactions: $e');
     }
 
@@ -62,80 +80,56 @@ class TransactionProvider extends ChangeNotifier {
   }
 
   Future<bool> addTransaction(TransactionModel transaction) async {
-    if (_dbHelper is! SqliteHelper) {
-      await checkConnectivity();
-      if (!_isOnline) {
-        _errorMessage = 'Tidak ada koneksi internet';
-        notifyListeners();
-        return false;
-      }
-    } else {
-      _isOnline = true;
-    }
+    if (!await _requiresOnline()) return false;
 
     try {
       final newTransaction = await _dbHelper.createTransaction(transaction);
       _transactions.insert(0, newTransaction);
+      _setSuccess('Transaksi berhasil ditambahkan');
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      _setError(e.toString());
       debugPrint('Error adding transaction: $e');
       return false;
     }
   }
 
   Future<bool> deleteTransaction(String id) async {
-    if (_dbHelper is! SqliteHelper) {
-      await checkConnectivity();
-      if (!_isOnline) {
-        _errorMessage = 'Tidak ada koneksi internet';
-        notifyListeners();
-        return false;
-      }
-    } else {
-      _isOnline = true;
-    }
+    if (!await _requiresOnline()) return false;
 
     try {
       await _dbHelper.deleteTransaction(id);
       _transactions.removeWhere((t) => t.id == id);
+      _setSuccess('Transaksi berhasil dihapus');
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      _setError(e.toString());
       debugPrint('Error deleting transaction: $e');
       return false;
     }
   }
 
   Future<bool> updateTransaction(TransactionModel transaction) async {
-    if (_dbHelper is! SqliteHelper) {
-      await checkConnectivity();
-      if (!_isOnline) {
-        _errorMessage = 'Tidak ada koneksi internet';
-        notifyListeners();
-        return false;
-      }
-    } else {
-      _isOnline = true;
-    }
+    if (!await _requiresOnline()) return false;
 
     try {
       final transactionId = transaction.safeId;
       if (transactionId.isEmpty) {
-        _errorMessage = 'Transaction ID is required for update';
+        _setError('Transaction ID is required for update');
         return false;
       }
       final updatedTransaction = await _dbHelper.updateTransaction(transactionId, transaction);
       final index = _transactions.indexWhere((t) => t.id == transaction.id);
       if (index != -1) {
         _transactions[index] = updatedTransaction;
+        _setSuccess('Transaksi berhasil diperbarui');
         notifyListeners();
       }
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      _setError(e.toString());
       debugPrint('Error updating transaction: $e');
       return false;
     }
@@ -145,7 +139,7 @@ class TransactionProvider extends ChangeNotifier {
     double income = 0;
     double expense = 0;
     for (final t in _transactions) {
-      if (t.type == 'income') {
+      if (t.type == TransactionType.income) {
         income += t.amount;
       } else {
         expense += t.amount;
@@ -158,7 +152,7 @@ class TransactionProvider extends ChangeNotifier {
     final now = DateTime.now();
     return _transactions
         .where((t) =>
-            t.type == 'income' &&
+            t.type == TransactionType.income &&
             t.date.month == now.month &&
             t.date.year == now.year)
         .fold(0.0, (sum, t) => sum + t.amount);
@@ -168,7 +162,7 @@ class TransactionProvider extends ChangeNotifier {
     final now = DateTime.now();
     return _transactions
         .where((t) =>
-            t.type == 'expense' &&
+            t.type == TransactionType.expense &&
             t.date.month == now.month &&
             t.date.year == now.year)
         .fold(0.0, (sum, t) => sum + t.amount);
@@ -177,7 +171,7 @@ class TransactionProvider extends ChangeNotifier {
   Map<String, double> getCategoryTotals(int month, int year) {
     final Map<String, double> categoryTotals = {};
     final filteredTransactions = _transactions.where((t) =>
-        t.type == 'expense' &&
+        t.type == TransactionType.expense &&
         t.date.month == month &&
         t.date.year == year);
 
@@ -194,7 +188,7 @@ class TransactionProvider extends ChangeNotifier {
   double getMonthlyIncomeByMonth(int month, int year) {
     return _transactions
         .where((t) =>
-            t.type == 'income' &&
+            t.type == TransactionType.income &&
             t.date.month == month &&
             t.date.year == year)
         .fold(0.0, (sum, t) => sum + t.amount);
@@ -203,7 +197,7 @@ class TransactionProvider extends ChangeNotifier {
   double getMonthlyExpenseByMonth(int month, int year) {
     return _transactions
         .where((t) =>
-            t.type == 'expense' &&
+            t.type == TransactionType.expense &&
             t.date.month == month &&
             t.date.year == year)
         .fold(0.0, (sum, t) => sum + t.amount);

@@ -1,10 +1,11 @@
 import 'package:pocketbase/pocketbase.dart';
+import 'transaction_type.dart';
 
 class TransactionModel {
   final String? id;
   final String title;
   final double amount;
-  final String type;
+  final TransactionType type;
   final String category;
   final DateTime date;
   final String note;
@@ -26,7 +27,7 @@ class TransactionModel {
       id: record.id,
       title: record.data['title'] as String,
       amount: (record.data['amount'] as num).toDouble(),
-      type: record.data['type'] as String,
+      type: TransactionType.fromString(record.data['type'] as String),
       category: record.data['category'] as String,
       date: DateTime.parse(record.data['date'] as String),
       note: (record.data['note'] as String?) ?? '',
@@ -37,7 +38,7 @@ class TransactionModel {
     return {
       'title': title,
       'amount': amount,
-      'type': type,
+      'type': type.value,
       'category': category,
       'date': date.toIso8601String(),
       'note': note,
@@ -49,7 +50,7 @@ class TransactionModel {
       id: map['id'] as String?,
       title: map['title'] as String,
       amount: (map['amount'] as num).toDouble(),
-      type: map['type'] as String,
+      type: TransactionType.fromString(map['type'] as String),
       category: map['category'] as String,
       date: DateTime.parse(map['date'] as String),
       note: (map['note'] as String?) ?? '',
@@ -61,7 +62,7 @@ class TransactionModel {
       'id': id,
       'title': title,
       'amount': amount,
-      'type': type,
+      'type': type.value,
       'category': category,
       'date': date.toIso8601String(),
       'note': note,
@@ -72,7 +73,7 @@ class TransactionModel {
     String? id,
     String? title,
     double? amount,
-    String? type,
+    TransactionType? type,
     String? category,
     DateTime? date,
     String? note,

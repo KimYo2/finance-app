@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction_model.dart';
+import '../models/transaction_type.dart';
 import '../utils/app_theme.dart';
 
 class TransactionCard extends StatelessWidget {
@@ -28,7 +29,7 @@ class TransactionCard extends StatelessWidget {
     );
 
     final dateFormat = DateFormat('dd MMM yyyy', 'id_ID');
-    final isIncome = transaction.type == 'income';
+    final isIncome = transaction.type == TransactionType.income;
     final amountColor = isIncome 
         ? AppTheme.incomeColor(context) 
         : AppTheme.expenseColor(context);

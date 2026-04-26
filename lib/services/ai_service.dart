@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 import '../models/transaction_model.dart';
+import '../models/transaction_type.dart';
 
 const String _apiToken = String.fromEnvironment('GROQ_API_KEY', defaultValue: '');
 
@@ -361,7 +362,7 @@ ATURAN PENTING:
         final transaction = TransactionModel(
           title: data['category'] as String? ?? 'Lainnya',
           amount: amount,
-          type: data['type'] as String? ?? 'expense',
+          type: TransactionType.fromString(data['type'] as String? ?? 'expense'),
           category: data['category'] as String? ?? 'Lainnya',
           date: DateTime.tryParse(data['date'] as String? ?? '') ?? DateTime.now(),
           note: data['note'] as String? ?? '',
@@ -564,7 +565,7 @@ ${buffer.toString()}''';
     final Map<String, double> categoryMap = {};
 
     for (final tx in transactions) {
-      if (tx.type == 'income' || tx.type == 'pemasukan') {
+      if (tx.type == TransactionType.income) {
         totalIncome += tx.amount;
       } else {
         totalExpense += tx.amount;

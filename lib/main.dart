@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+
 import 'providers/transaction_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/usage_provider.dart';
@@ -14,6 +15,7 @@ import 'screens/add_transaction_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/report_screen.dart';
 import 'screens/ai_chat_screen.dart';
+import 'utils/error_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -126,6 +128,18 @@ class _AppShellState extends State<AppShell> {
     ReportScreen(),
     AiChatScreen(),
   ];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final provider = context.read<TransactionProvider>();
+    provider.onError = (message) {
+      ErrorHandler.showError(context, message);
+    };
+    provider.onSuccess = (message) {
+      ErrorHandler.showSuccess(context, message);
+    };
+  }
 
   int _navToScreenIndex(int navIndex) {
     if (navIndex < 2) return navIndex;
