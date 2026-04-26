@@ -61,9 +61,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: isIOS
-                          ? [const Color(0xFF34C759), const Color(0xFF30B350)]
-                          : [const Color(0xFF4CAF50), const Color(0xFF43A047)],
+                      colors: balance >= 0
+                          ? (isIOS
+                              ? [const Color(0xFF34C759), const Color(0xFF30B350)]
+                              : [const Color(0xFF4CAF50), const Color(0xFF43A047)])
+                          : [Colors.red.shade700, Colors.red.shade900],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -126,10 +128,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isIOS
-                              ? const Color(0xFFE8F5E9)
-                              : Colors.green.shade50,
+                          gradient: isDark
+                              ? null
+                              : LinearGradient(
+                                  colors: [
+                                    const Color(0xFF4CAF50).withValues(alpha: 0.15),
+                                    const Color(0xFF4CAF50).withValues(alpha: 0.05),
+                                  ],
+                                ),
+                          color: isDark ? AppTheme.darkCard : null,
                           borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                              color: Colors.black.withValues(alpha: 0.06),
+                            ),
+                          ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,7 +153,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               isIOS
                                   ? CupertinoIcons.arrow_down_circle_fill
                                   : Icons.arrow_downward,
-                              color: Colors.green,
+                              color: const Color(0xFF4CAF50),
                             ),
                             const SizedBox(height: 8),
                             const Text(
@@ -154,7 +169,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.green,
+                                color: Color(0xFF4CAF50),
                               ),
                             ),
                           ],
@@ -166,10 +181,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isIOS
-                              ? const Color(0xFFFFEBEE)
-                              : Colors.red.shade50,
+                          gradient: isDark
+                              ? null
+                              : LinearGradient(
+                                  colors: [
+                                    Colors.red.withValues(alpha: 0.15),
+                                    Colors.red.withValues(alpha: 0.05),
+                                  ],
+                                ),
+                          color: isDark ? AppTheme.darkCard : null,
                           borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                              color: Colors.black.withValues(alpha: 0.06),
+                            ),
+                          ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -574,6 +602,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final usageProvider = Provider.of<UsageProvider>(context, listen: false);
     final isPremium = usageProvider.isPremium;
     final txProvider = Provider.of<TransactionProvider>(context, listen: false);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final month = DateTime.now().month;
     final year = DateTime.now().year;
@@ -671,65 +700,74 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.lightbulb, color: Color(0xFF4CAF50)),
-                    SizedBox(width: 8),
-                    Text(
-                      'Saran Keuangan AI',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.darkCard : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.06),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.lightbulb, color: Color(0xFF4CAF50)),
+                  SizedBox(width: 8),
+                  Text(
+                    'Saran Keuangan AI',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                  ],
-                ),
-                IconButton(
-                  icon: const Icon(Icons.refresh, size: 20),
-                  onPressed: _refreshRecommendation,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            FutureBuilder<String>(
-              future: AiRecommendationService().generateBudgetRecommendation(
-                categoryTotals: categoryTotals,
-                totalIncome: income,
-                totalExpense: expense,
+                  ),
+                ],
               ),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: Column(
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 8),
-                        Text('Menganalisis...'),
-                      ],
-                    ),
-                  );
-                } else if (snapshot.hasError) {
-                  return Text('Gagal: ${snapshot.error}');
-                }
-                return MarkdownBody(
-                  data: snapshot.data ?? '',
-                  styleSheet: MarkdownStyleSheet(
-                    p: const TextStyle(fontSize: 14),
+              IconButton(
+                icon: const Icon(Icons.refresh, size: 20),
+                onPressed: _refreshRecommendation,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          FutureBuilder<String>(
+            future: AiRecommendationService().generateBudgetRecommendation(
+              categoryTotals: categoryTotals,
+              totalIncome: income,
+              totalExpense: expense,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: Column(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 8),
+                      Text('Menganalisis...'),
+                    ],
                   ),
                 );
-              },
-            ),
-          ],
-        ),
+              } else if (snapshot.hasError) {
+                return Text('Gagal: ${snapshot.error}');
+              }
+              return MarkdownBody(
+                data: snapshot.data ?? '',
+                styleSheet: MarkdownStyleSheet(
+                  p: const TextStyle(fontSize: 14),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
