@@ -9,6 +9,14 @@ import 'package:intl/intl.dart';
 
 import '../models/transaction_model.dart';
 
+const List<Map<String, String>> kGroqModelFallbacks = [
+  {'model': 'llama-3.1-8b-instant', 'label': 'Llama 3.1 8B'},
+  {'model': 'llama3-8b-8192', 'label': 'Llama 3 8B'},
+  {'model': 'gemma2-9b-it', 'label': 'Gemma 2 9B'},
+  {'model': 'mixtral-8x7b-32768', 'label': 'Mixtral 8x7B'},
+  {'model': 'llama-3.3-70b-versatile', 'label': 'Llama 3.3 70B'},
+];
+
 class AiService {
   static AiService? _instance;
   bool _isInitialized = false;
@@ -16,7 +24,13 @@ class AiService {
   String? _lastError;
   DateTime? _lastRequestTime;
 
-  static const String _model = 'llama-3.1-8b-instant';
+  int _currentModelIndex = 0;
+  DateTime? _modelSwitchedAt;
+
+  String get _currentModel => kGroqModelFallbacks[_currentModelIndex]['model']!;
+  String get currentModelLabel =>
+      kGroqModelFallbacks[_currentModelIndex]['label']!;
+
   static const String _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
   static const Duration _minRequestInterval = Duration(seconds: 3);
 
@@ -104,8 +118,67 @@ ATURAN PENTING:
 
     _isInitialized = true;
     _lastError = null;
-    debugPrint('[AiService] Initialized successfully! Model: $_model');
+    debugPrint('[AiService] Initialized successfully! Model: $_currentModel');
     return true;
+  }
+
+  void _tryResetModel() {
+    if (_currentModelIndex > 0 && _modelSwitchedAt != null) {
+      final elapsed = DateTime.now().difference(_modelSwitchedAt!);
+      if (elapsed.inMinutes >= 5) {
+        _currentModelIndex = 0;
+        _modelSwitchedAt = null;
+        debugPrint('[AiService] Model direset ke $_currentModel');
+      }
+    }
+  }
+
+  Future<http.Response> _callWithFallback(Map<String, dynamic> body) async {
+    final startIndex = _currentModelIndex;
+
+    for (int i = startIndex; i < kGroqModelFallbacks.length; i++) {
+      final model = kGroqModelFallbacks[i]['model']!;
+      final label = kGroqModelFallbacks[i]['label']!;
+      body['model'] = model;
+
+      debugPrint('[AiService] Mencoba model: $label ($model)');
+
+      try {
+        final response = await http
+            .post(
+              Uri.parse(_baseUrl),
+              headers: {
+                'Authorization': 'Bearer $_apiToken',
+                'Content-Type': 'application/json',
+              },
+              body: jsonEncode(body),
+            )
+            .timeout(const Duration(seconds: 30));
+
+        if (response.statusCode == 429 || response.statusCode == 503) {
+          debugPrint(
+              '[AiService] $label kena limit (${response.statusCode}), switch...');
+          if (i + 1 < kGroqModelFallbacks.length) {
+            _currentModelIndex = i + 1;
+            _modelSwitchedAt = DateTime.now();
+          }
+          continue;
+        }
+
+        if (i != startIndex) {
+          debugPrint('[AiService] Berhasil dengan fallback: $label');
+        }
+        return response;
+
+      } on TimeoutException {
+        debugPrint('[AiService] $label timeout, mencoba model berikutnya...');
+        continue;
+      }
+    }
+
+    _currentModelIndex = 0;
+    _modelSwitchedAt = null;
+    throw Exception('semua_model_gagal');
   }
 
   Future<bool> reinitialize() async {
@@ -136,8 +209,10 @@ ATURAN PENTING:
     final dateStr = currentDate.toIso8601String().split('T')[0];
 
     try {
+      _tryResetModel();
+
       final requestBody = jsonEncode({
-        'model': _model,
+        'model': _currentModel,
         'messages': [
           {
             'role': 'system',
@@ -154,22 +229,11 @@ ATURAN PENTING:
       });
 
       if (kDebugMode) {
-        debugPrint('[AiService] Sending to HF API...');
+        debugPrint('[AiService] Sending to Groq API... Model: $currentModelLabel');
       }
 
-      final response = await http
-          .post(
-            Uri.parse(_baseUrl),
-            headers: {
-              'Authorization': 'Bearer $_apiToken',
-              'Content-Type': 'application/json',
-            },
-            body: requestBody,
-          )
-          .timeout(
-            const Duration(seconds: 30),
-            onTimeout: () => throw TimeoutException('HF API timeout'),
-          );
+      final bodyMap = jsonDecode(requestBody) as Map<String, dynamic>;
+      final response = await _callWithFallback(bodyMap);
 
       if (kDebugMode) {
         debugPrint('[AiService] Status: ${response.statusCode}');
@@ -186,34 +250,24 @@ ATURAN PENTING:
           final text = choices[0]['message']['content'] as String;
           return _parseResponse(text.trim());
 
-        case 503:
-          return AiResponse(
-            action: AiAction.chat,
-            message: 'Model AI sedang loading, tunggu 20-30 detik lalu coba lagi! ⏳\n\n'
-                     '(Ini normal terjadi jika model belum digunakan beberapa waktu)',
-          );
-
-        case 429:
-          return AiResponse(
-            action: AiAction.chat,
-            message: 'Terlalu banyak request. Tunggu 1 menit lalu coba lagi! 🐢',
-          );
-
         case 401:
           _isInitialized = false;
           return AiResponse(
             action: AiAction.chat,
-            message: 'HF Token tidak valid atau expired. Cek file .env kamu! 🔑',
+            message:
+                'HF Token tidak valid atau expired. Cek file .env kamu! 🔑',
           );
 
         case 403:
           return AiResponse(
             action: AiAction.chat,
-            message: 'Akses ditolak. Pastikan token HF punya permission "Read"! 🔒',
+            message:
+                'Akses ditolak. Pastikan token HF punya permission "Read"! 🔒',
           );
 
         default:
-          debugPrint('[AiService] Unexpected status: ${response.statusCode}\n${response.body}');
+          debugPrint(
+              '[AiService] Unexpected status: ${response.statusCode}\n${response.body}');
           return AiResponse(
             action: AiAction.chat,
             message: 'AI error (${response.statusCode}). Coba lagi ya! 😅',
@@ -226,6 +280,13 @@ ATURAN PENTING:
       );
     } catch (e) {
       debugPrint('[AiService] Exception: $e');
+      if (e.toString().contains('semua_model_gagal')) {
+        return AiResponse(
+          action: AiAction.chat,
+          message:
+              'Semua model AI sedang tidak tersedia. Coba lagi dalam beberapa menit! 🔄',
+        );
+      }
       return AiResponse(
         action: AiAction.chat,
         message: 'Koneksi bermasalah. Cek internet dan coba lagi! 📶',
@@ -346,11 +407,12 @@ class AiResponse {
 }
 
 class AiRecommendationService {
-  static const String _model = 'llama-3.1-8b-instant';
   static const String _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
   static const Duration _minRequestInterval = Duration(seconds: 3);
 
   DateTime? _lastRequestTime;
+  int _currentModelIndex = 0;
+  DateTime? _modelSwitchedAt;
 
   final _currencyFormat = NumberFormat.currency(
     locale: 'id_ID',
@@ -372,34 +434,65 @@ class AiRecommendationService {
       throw Exception('API key belum dikonfigurasi. Cek file .env!');
     }
 
-    final response = await http.post(
-      Uri.parse(_baseUrl),
-      headers: {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'model': _model,
-        'messages': [
-          {'role': 'system', 'content': systemPrompt},
-          {'role': 'user', 'content': userPrompt},
-        ],
-        'temperature': 0.7,
-        'max_tokens': 1024,
-      }),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('AI error: ${response.statusCode}');
+    if (_currentModelIndex > 0 && _modelSwitchedAt != null) {
+      if (DateTime.now().difference(_modelSwitchedAt!).inMinutes >= 5) {
+        _currentModelIndex = 0;
+        _modelSwitchedAt = null;
+      }
     }
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    final choices = data['choices'] as List<dynamic>;
-    if (choices.isEmpty) {
-      throw Exception('响应 kosong');
+    final bodyBase = {
+      'messages': [
+        {'role': 'system', 'content': systemPrompt},
+        {'role': 'user', 'content': userPrompt},
+      ],
+      'temperature': 0.7,
+      'max_tokens': 1024,
+    };
+
+    for (int i = _currentModelIndex; i < kGroqModelFallbacks.length; i++) {
+      final model = kGroqModelFallbacks[i]['model']!;
+      final label = kGroqModelFallbacks[i]['label']!;
+      final body = {...bodyBase, 'model': model};
+
+      debugPrint('[AiRecommendation] Mencoba: $label');
+
+      try {
+        final response = await http.post(
+          Uri.parse(_baseUrl),
+          headers: {
+            'Authorization': 'Bearer $apiKey',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(body),
+        ).timeout(const Duration(seconds: 45));
+
+        if (response.statusCode == 429 || response.statusCode == 503) {
+          if (i + 1 < kGroqModelFallbacks.length) {
+            _currentModelIndex = i + 1;
+            _modelSwitchedAt = DateTime.now();
+          }
+          continue;
+        }
+
+        if (response.statusCode != 200) {
+          throw Exception('AI error: ${response.statusCode}');
+        }
+
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final choices = data['choices'] as List<dynamic>;
+        if (choices.isEmpty) throw Exception('Response kosong');
+
+        return choices[0]['message']['content'] as String;
+
+      } on TimeoutException {
+        continue;
+      }
     }
 
-    return choices[0]['message']['content'] as String;
+    _currentModelIndex = 0;
+    _modelSwitchedAt = null;
+    throw Exception('Semua model AI tidak tersedia saat ini');
   }
 
   Future<String> generateWeeklySummary(List<TransactionModel> transactions) async {
