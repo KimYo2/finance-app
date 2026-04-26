@@ -668,7 +668,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: isDark ? AppTheme.darkCard : Colors.grey,
+                    color: isDark ? AppTheme.darkCard : Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(message.text),
