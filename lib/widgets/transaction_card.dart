@@ -115,13 +115,30 @@ class TransactionCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    '$amountPrefix${currencyFormat.format(transaction.amount)}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      color: amountColor,
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!transaction.isSynced)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Tooltip(
+                            message: 'Menunggu sinkronisasi',
+                            child: Icon(
+                              Icons.cloud_off,
+                              size: 14,
+                              color: Colors.orange.shade400,
+                            ),
+                          ),
+                        ),
+                      Text(
+                        '$amountPrefix${currencyFormat.format(transaction.amount)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          color: amountColor,
+                        ),
+                      ),
+                    ],
                   ),
                   if (showEditIcon) ...[
                     const SizedBox(height: 4),
@@ -222,13 +239,30 @@ class TransactionCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    '$amountPrefix${currencyFormat.format(transaction.amount)}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      color: amountColor,
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!transaction.isSynced)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Tooltip(
+                            message: 'Menunggu sinkronisasi',
+                            child: Icon(
+                              Icons.cloud_off,
+                              size: 14,
+                              color: Colors.orange.shade400,
+                            ),
+                          ),
+                        ),
+                      Text(
+                        '$amountPrefix${currencyFormat.format(transaction.amount)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          color: amountColor,
+                        ),
+                      ),
+                    ],
                   ),
                   if (showEditIcon) ...[
                     const SizedBox(height: 4),

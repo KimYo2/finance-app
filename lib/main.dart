@@ -9,18 +9,18 @@ import 'package:provider/provider.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/usage_provider.dart';
+import 'providers/budget_provider.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/add_transaction_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/report_screen.dart';
 import 'screens/ai_chat_screen.dart';
+import 'screens/budget_screen.dart';
 import 'utils/error_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Note: API keys are now passed via --dart-define at build time
-  // e.g., flutter run --dart-define=GROQ_API_KEY=your_key
   await initializeDateFormatting('id_ID', null);
   runApp(const FinanceApp());
 }
@@ -49,6 +49,13 @@ class FinanceApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) {
             final provider = UsageProvider();
+            provider.initialize();
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            final provider = BudgetProvider();
             provider.initialize();
             return provider;
           },
@@ -125,6 +132,7 @@ class _AppShellState extends State<AppShell> {
   final List<Widget> _screens = const [
     DashboardScreen(),
     HistoryScreen(),
+    BudgetScreen(),
     ReportScreen(),
     AiChatScreen(),
   ];
@@ -141,28 +149,11 @@ class _AppShellState extends State<AppShell> {
     };
   }
 
-  int _navToScreenIndex(int navIndex) {
-    if (navIndex < 2) return navIndex;
-    return navIndex - 1;
-  }
-
   void _onNavTap(int index) {
-    if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const AddTransactionScreen(),
-        ),
-      );
-      return;
-    }
-    setState(() => _currentIndex = _navToScreenIndex(index));
+    setState(() => _currentIndex = index);
   }
 
-  int get _activeNavIndex {
-    if (_currentIndex < 2) return _currentIndex;
-    return _currentIndex + 1;
-  }
+  int get _activeNavIndex => _currentIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -176,48 +167,30 @@ class _AppShellState extends State<AppShell> {
         tabBar: CupertinoTabBar(
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
-          items: [
-            const BottomNavigationBarItem(
+          items: const [
+            BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.home),
               label: 'Beranda',
             ),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.clock),
               label: 'Riwayat',
             ),
             BottomNavigationBarItem(
-              icon: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: activeColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(CupertinoIcons.add, color: Colors.white),
-              ),
-              label: '',
+              icon: Icon(CupertinoIcons.money_dollar_circle),
+              label: 'Budget',
             ),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.chart_pie),
               label: 'Laporan',
             ),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.chat_bubble_2),
               label: 'AI Chat',
             ),
           ],
         ),
         tabBuilder: (context, index) {
-          if (index == 2) {
-            return CupertinoPageScaffold(
-              child: SafeArea(
-                child: _screens[_currentIndex],
-              ),
-            );
-          }
-          if (index > 2) {
-            index = index - 1;
-          }
           return CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
               middle: Text(_getTitle(index)),
@@ -267,7 +240,14 @@ class _AppShellState extends State<AppShell> {
                   activeColor: activeColor,
                   inactiveColor: inactiveColor,
                 ),
-                _buildCenterAddButton(activeColor),
+                _buildNavItem(
+                  navIndex: 2,
+                  icon: Icons.account_balance_wallet_outlined,
+                  activeIcon: Icons.account_balance_wallet,
+                  label: 'Budget',
+                  activeColor: activeColor,
+                  inactiveColor: inactiveColor,
+                ),
                 _buildNavItem(
                   navIndex: 3,
                   icon: Icons.bar_chart_outlined,
@@ -288,6 +268,17 @@ class _AppShellState extends State<AppShell> {
             ),
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const AddTransactionScreen(),
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -333,46 +324,6 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
-  Widget _buildCenterAddButton(Color activeColor) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _onNavTap(2),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    activeColor,
-                    activeColor.withValues(alpha: 0.75),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: activeColor.withValues(alpha: 0.4),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.add_rounded,
-                color: Colors.white,
-                size: 28,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   String _getTitle(int index) {
     switch (index) {
       case 0:
@@ -380,8 +331,10 @@ class _AppShellState extends State<AppShell> {
       case 1:
         return 'Riwayat Transaksi';
       case 2:
-        return 'Laporan';
+        return 'Budget Bulanan';
       case 3:
+        return 'Laporan';
+      case 4:
         return 'AI Chat';
       default:
         return 'UWANGKU';

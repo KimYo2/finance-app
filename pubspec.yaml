@@ -38,6 +38,7 @@ dependencies:
   flutter_tesseract_ocr: ^0.4.21
   file_picker: ^8.1.2
   csv: ^6.0.0
+  flutter_local_notifications: ^18.0.1
 
 dev_dependencies:
   flutter_test:

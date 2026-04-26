@@ -9,6 +9,7 @@ class TransactionModel {
   final String category;
   final DateTime date;
   final String note;
+  final bool isSynced;
 
   TransactionModel({
     this.id,
@@ -18,6 +19,7 @@ class TransactionModel {
     required this.category,
     required this.date,
     required this.note,
+    this.isSynced = true,
   });
 
   String get safeId => id ?? '';
@@ -54,6 +56,7 @@ class TransactionModel {
       category: map['category'] as String,
       date: DateTime.parse(map['date'] as String),
       note: (map['note'] as String?) ?? '',
+      isSynced: map['isSynced'] as bool? ?? true,
     );
   }
 
@@ -66,6 +69,7 @@ class TransactionModel {
       'category': category,
       'date': date.toIso8601String(),
       'note': note,
+      'isSynced': isSynced,
     };
   }
 
@@ -77,6 +81,7 @@ class TransactionModel {
     String? category,
     DateTime? date,
     String? note,
+    bool? isSynced,
   }) {
     return TransactionModel(
       id: id ?? this.id,
@@ -86,6 +91,7 @@ class TransactionModel {
       category: category ?? this.category,
       date: date ?? this.date,
       note: note ?? this.note,
+      isSynced: isSynced ?? this.isSynced,
     );
   }
 }
