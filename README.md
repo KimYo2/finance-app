@@ -112,19 +112,50 @@ import 'database/sqlite_helper.dart';
 provider.switchStorage(SqliteHelper());
 ```
 
+## Setup API Keys
+
+API keys TIDAK lagi disimpan di file `.env` yang dibundle ke app. 
+Ini untuk mencegah key terekspos di APK/IPA.
+
+### Cara Setup (Build Time)
+
+Gunakan `--dart-define` saat build atau run:
+
+```bash
+# Run (development)
+flutter run --dart-define=GROQ_API_KEY=your_groq_key_here
+
+# Build Android
+flutter build apk --dart-define=GROQ_API_KEY=your_groq_key_here
+
+# Build iOS
+flutter build ios --dart-define=GROQ_API_KEY=your_groq_key_here
+```
+
+Untuk development lokal, bisa buat file `.env` (sudah di-gitignore):
+
+```
+GROQ_API_KEY=your_groq_key_here
+```
+
+###.env.example
+
+Copy `.env.example` ke `.env` untuk development lokal:
+
+```bash
+cp .env.example .env
+# Edit .env dengan key asli
+```
+
 ## AI Chat Integration
 
 Aplikasi menggunakan **Groq Llama 3.1 8B** untuk memproses input natural language:
 
-1. **Setup API Key:**
+1. **Dapatkan API Key:**
    - Buka: https://console.groq.com/keys
    - Login dengan Google/GitHub Account
    - Klik "Create API Key"
-   - Copy ke file `.env`:
-
-   ```
-   GROQ_API_KEY=gsk_...
-   ```
+   - Copy key dan gunakan saat build/run (lihat section Setup API Keys)
 
 2. **Cara Penggunaan:**
    - Tap tombol AI (icon robot) di FAB dashboard
@@ -214,14 +245,14 @@ flutter run
 ## Build
 
 ```bash
-# Android APK
-flutter build apk --debug
+# Android APK (dengan API key)
+flutter build apk --dart-define=GROQ_API_KEY=your_groq_key_here
 
 # Android Release
-flutter build apk --release
+flutter build apk --release --dart-define=GROQ_API_KEY=your_groq_key_here
 
 # iOS (hanya di macOS)
-flutter build ios --release
+flutter build ios --release --dart-define=GROQ_API_KEY=your_groq_key_here
 ```
 
 ## Requirements
@@ -234,16 +265,37 @@ flutter build ios --release
 
 ## Configuration
 
-Buat file `.env` di root project:
+### API Keys
 
-```
-# Groq AI (wajib untuk AI features)
-GROQ_API_KEY=gsk_...
+API keys sekarang Passed via `--dart-define` saat build time:
 
-# Midtrans (wajib untuk payment)
-MIDTRANS_SERVER_KEY=SB-Mid-server-xxxx
-MIDTRANS_BASE_URL=https://app.sandbox.midtrans.com/snap/v1/transactions
+```bash
+flutter run --dart-define=GROQ_API_KEY=gsk_xxxxxxxxxx
 ```
+
+Lihat section **Setup API Keys** untuk detail lengkap.
+
+### PocketBase (Optional - Online Sync)
+
+Jika ingin menggunakan PocketBase untuk online sync:
+
+```bash
+# Run PocketBase server
+./pocketbase serve
+
+# Default URL sudah dikonfigurasi di lib/database/pb_helper.dart
+# Android emulator: http://10.0.2.2:8090
+# iOS simulator: http://127.0.0.1:8090
+```
+
+### Midtrans Payment
+
+Payment menggunakan PocketBase hook (server-side). 
+Pastikan:
+
+1. PocketBase server berjalan
+2. Hook `pb_hooks/create_snap_token.pb.js` sudah di-register
+3. Environment variable `MIDTRANS_SERVER_KEY` dan `MIDTRANS_BASE_URL` sudah diset di server
 
 ## Lisensi
 

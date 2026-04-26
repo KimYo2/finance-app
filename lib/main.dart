@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/usage_provider.dart';
@@ -18,11 +17,8 @@ import 'screens/ai_chat_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await dotenv.load(fileName: '.env');
-  } catch (e) {
-    // .env maybe not found in some environments, continue anyway
-  }
+  // Note: API keys are now passed via --dart-define at build time
+  // e.g., flutter run --dart-define=GROQ_API_KEY=your_key
   await initializeDateFormatting('id_ID', null);
   runApp(const FinanceApp());
 }

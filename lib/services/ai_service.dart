@@ -3,11 +3,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 import '../models/transaction_model.dart';
+
+const String _apiToken = String.fromEnvironment('GROQ_API_KEY', defaultValue: '');
 
 const List<Map<String, String>> kGroqModelFallbacks = [
   {'model': 'llama-3.1-8b-instant', 'label': 'Llama 3.1 8B'},
@@ -20,7 +21,6 @@ const List<Map<String, String>> kGroqModelFallbacks = [
 class AiService {
   static AiService? _instance;
   bool _isInitialized = false;
-  String _apiToken = '';
   String? _lastError;
   DateTime? _lastRequestTime;
 
@@ -101,11 +101,9 @@ ATURAN PENTING:
   Future<bool> initialize() async {
     if (_isInitialized) return true;
 
-    _apiToken = dotenv.env['GROQ_API_KEY'] ?? '';
-
     if (kDebugMode) {
       if (_apiToken.isEmpty) {
-        debugPrint('[AiService] ERROR: GROQ_API_KEY tidak ditemukan di .env!');
+        debugPrint('[AiService] ERROR: GROQ_API_KEY tidak ditemukan! Use --dart-define=GROQ_API_KEY=your_key');
       } else {
         debugPrint('[AiService] Groq API Key: ${_apiToken.substring(0, 8)}...');
       }
@@ -183,7 +181,6 @@ ATURAN PENTING:
 
   Future<bool> reinitialize() async {
     _isInitialized = false;
-    _apiToken = '';
     _lastError = null;
     return await initialize();
   }
@@ -298,13 +295,12 @@ ATURAN PENTING:
     if (errorType == 'token_empty') {
       return AiResponse(
         action: AiAction.chat,
-        message: '⚠️ Hugging Face Token belum dikonfigurasi!\n\n'
-                 'Cara mendapatkan token gratis:\n'
-                 '1. Daftar di huggingface.co\n'
-                 '2. Buka Settings → Access Tokens\n'
-                 '3. Klik "New token" → role: Read\n'
-                 '4. Copy token → paste di file .env:\n'
-                 '   GROQ_API_KEY=gsk_xxxxxxxxxxxxx\n\n'
+        message: '⚠️ Groq API Key belum dikonfigurasi!\n\n'
+                 'Cara mendapatkan API key gratis:\n'
+                 '1. Daftar di console.groq.com\n'
+                 '2. Buka API Keys → Create API Key\n'
+                 '3. Copy key → build dengan:\n'
+                 '   flutter run --dart-define=GROQ_API_KEY=gsk_xxxxxxxx\n\n'
                  'Lalu restart aplikasi! 🔄',
       );
     }
@@ -420,6 +416,8 @@ class AiRecommendationService {
     decimalDigits: 0,
   );
 
+  String get _apiKey => String.fromEnvironment('GROQ_API_KEY', defaultValue: '');
+
   Future<String> _sendToGroq(String systemPrompt, String userPrompt) async {
     if (_lastRequestTime != null) {
       final elapsed = DateTime.now().difference(_lastRequestTime!);
@@ -429,9 +427,9 @@ class AiRecommendationService {
     }
     _lastRequestTime = DateTime.now();
 
-    final apiKey = dotenv.env['GROQ_API_KEY'] ?? '';
+    final apiKey = _apiKey;
     if (apiKey.isEmpty) {
-      throw Exception('API key belum dikonfigurasi. Cek file .env!');
+      throw Exception('API key belum dikonfigurasi. Gunakan --dart-define=GROQ_API_KEY=your_key');
     }
 
     if (_currentModelIndex > 0 && _modelSwitchedAt != null) {

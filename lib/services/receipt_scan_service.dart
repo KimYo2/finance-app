@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 import '../models/receipt_scan_result.dart';
 import 'ocr_service.dart';
+
+const String _apiKey = String.fromEnvironment('GROQ_API_KEY', defaultValue: '');
 
 class ReceiptScanService {
   static const String _model = 'llama-3.1-8b-instant';
@@ -83,9 +84,8 @@ class ReceiptScanService {
     }
     _lastRequestTime = DateTime.now();
 
-    final apiKey = dotenv.env['GROQ_API_KEY'] ?? '';
-    if (apiKey.isEmpty) {
-      throw Exception('API key belum dikonfigurasi. Cek file .env!');
+    if (_apiKey.isEmpty) {
+      throw Exception('API key belum dikonfigurasi. Gunakan --dart-define=GROQ_API_KEY=your_key');
     }
 
     const systemPrompt = '''Kamu adalah asisten keuangan. Analisis teks struk belanja berikut dan ekstrak
@@ -109,7 +109,7 @@ Format output:
     final response = await http.post(
       Uri.parse(_baseUrl),
       headers: {
-        'Authorization': 'Bearer $apiKey',
+        'Authorization': 'Bearer $_apiKey',
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
