@@ -7,7 +7,7 @@ import '../services/pb_client.dart';
 import '../models/payment_model.dart';
 
 class MidtransService {
-  String get _pbBaseUrl => PbClient.instance.baseURL;
+  String get _pbBaseUrl => PbClient.instance.baseUrl;
   String get pbBaseUrl => _pbBaseUrl;
 
   PocketBase get _pocketBase => PbClient.instance;
@@ -39,6 +39,16 @@ class MidtransService {
     }
 
     try {
+      // Authenticate as admin
+      await _pocketBase.admins.authWithPassword(
+        'admin@uwangku.com',
+        'adminpassword123',
+      );
+
+      if (kDebugMode) {
+        debugPrint('[Midtrans] Admin auth success, sending request...');
+      }
+
       final response = await _pocketBase.send(
         '/api/create-snap-token',
         method: 'POST',
