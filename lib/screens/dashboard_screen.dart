@@ -6,14 +6,17 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../config/app_config.dart';
 import '../models/transaction_model.dart';
+import '../providers/budget_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/usage_provider.dart';
 import '../services/ai_service.dart';
 import '../screens/add_transaction_screen.dart';
+import '../screens/budget_screen.dart';
 import '../screens/history_screen.dart';
 import '../screens/upgrade_screen.dart';
 import '../utils/app_theme.dart';
+import '../widgets/budget_progress_card.dart';
 import '../widgets/transaction_card.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -232,6 +235,75 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
                 const SizedBox(height: 24),
+                Consumer<BudgetProvider>(
+                  builder: (context, budgetProvider, _) {
+                    final currentMonth = DateTime.now().month;
+                    final currentYear = DateTime.now().year;
+                    final budgets = budgetProvider.getBudgetsForMonth(currentMonth, currentYear);
+
+                    if (budgets.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const BudgetScreen()),
+                          ),
+                          icon: const Icon(Icons.add_chart_outlined),
+                          label: const Text('Atur Budget Bulanan'),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(44),
+                          ),
+                        ),
+                      );
+                    }
+
+                    final txProvider = context.read<TransactionProvider>();
+                    final categoryTotals = txProvider.getCategoryTotals(currentMonth, currentYear);
+                    final sortedBudgets = budgets.map((b) {
+                      final spent = categoryTotals[b.category] ?? 0.0;
+                      return MapEntry(b, spent);
+                    }).toList()
+                      ..sort((a, b) => (b.value / b.key.amount).compareTo(a.value / a.key.amount));
+                    final topBudgets = sortedBudgets.take(3).toList();
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Budget Bulan Ini',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const BudgetScreen()),
+                                ),
+                                child: const Text('Lihat Semua'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        ...topBudgets.map((entry) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: BudgetProgressCard(
+                            category: entry.key.category,
+                            budgetAmount: entry.key.amount,
+                            spentAmount: entry.value,
+                          ),
+                        )),
+                        const SizedBox(height: 8),
+                      ],
+                    );
+                  },
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
