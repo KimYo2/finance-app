@@ -3,19 +3,14 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:pocketbase/pocketbase.dart';
 
-import '../database/pb_helper.dart';
+import '../services/pb_client.dart';
 import '../models/payment_model.dart';
 
 class MidtransService {
-  PocketBase? _pb;
+  String get _pbBaseUrl => PbClient.instance.baseURL;
+  String get pbBaseUrl => _pbBaseUrl;
 
-  String get _pbBaseUrl => PbHelper().pb.baseURL;
-  String get pbBaseUrl => _pbBaseUrl; // Public for debug
-
-  PocketBase get _pocketBase {
-    _pb ??= PbHelper().pb;
-    return _pb!;
-  }
+  PocketBase get _pocketBase => PbClient.instance;
 
   bool get isConfigured => _pbBaseUrl.isNotEmpty;
 
