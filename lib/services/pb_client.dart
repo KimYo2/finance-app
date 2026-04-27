@@ -9,7 +9,6 @@ class PbClient {
 
   static PocketBase get instance {
     final baseUrl = _baseUrl;
-    // Reset instance if URL changed
     if (_instance == null || _currentUrl != baseUrl) {
       _instance = _createClient(baseUrl);
       _currentUrl = baseUrl;
@@ -18,11 +17,15 @@ class PbClient {
   }
 
   static PocketBase _createClient(String url) {
-    return PocketBase(url);
+    final client = PocketBase(url);
+    client.beforeSend = (url, options) {
+      options.headers['ngrok-skip-browser-warning'] = 'true';
+      return options;
+    };
+    return client;
   }
 
   static String get _baseUrl {
-    // Priority: --dart-define > AppConfig > default platform detection
     final fromDefine = String.fromEnvironment('PB_BASE_URL');
     if (fromDefine.isNotEmpty) return fromDefine;
 

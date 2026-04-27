@@ -53,9 +53,6 @@ class MidtransService {
           'customer_name': customerName,
           'customer_email': customerEmail,
         },
-        headers: {
-          'ngrok-skip-browser-warning': 'true',
-        },
       );
 
       if (kDebugMode) {
