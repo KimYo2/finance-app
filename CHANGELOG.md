@@ -2,6 +2,60 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-04-27
+
+### Added
+
+- **BudgetProgressCard on Dashboard** - Menampilkan progress budget bulan ini
+  - Top 3 kategori dengan spending tertinggi
+  - Empty state dengan button "Atur Budget Bulanan"
+  - Navigasi ke BudgetScreen via "Lihat Semua"
+  - Progress bar: green (normal), orange (warning), red (over budget)
+  - Menggunakan Consumer<BudgetProvider> untuk performa
+
+- **PocketBase Connection Configuration**
+  - PbClient singleton dengan env-based URL
+  - Support Android Emulator (10.0.2.2:8090)
+  - Support device fisik via --dart-define
+  - Connection check sebelum sync
+  - App tetap jalan offline jika PocketBase unreachable
+
+- **Unit Tests** - 12 test cases untuk TransactionProvider
+  - Balance calculations (totalBalance, monthlyIncome, monthlyExpense)
+  - Category totals grouping
+  - Monthly filtering
+  - Income/expense filtering
+
+- **Development Setup Section** di README.md
+  - Cara run di Android Emulator
+  - Cara run di device fisik
+  -Cara run di WSL Ubuntu
+
+### Changed
+
+- **pb_import.json** - Update ke PocketBase v0.20+ format
+  - Menggunakan `fields` (bukan `schema`)
+  - Menambahkan field options (min, max, presentable, unique, dll)
+  - 5 collections: transactions(8), categories(5), assets(7), debts(9), budgets(8)
+
+- **Midtrans Security Fix**
+  - Remove MIDTRANS_SERVER_KEY dari .env
+  - Server key sekarang hanya di server (PocketBase hook)
+  - Error messages dalam Bahasa Indonesia
+
+- **Icon Generation Scripts** - Pindahkan ke folder scripts/
+  - generate_icon.js → scripts/generate_icon.js
+  - generate_icons.js → scripts/generate_icons.js
+  - Update paths di package.json
+
+- **Git Author Fix** - Semua commit sekarang ter-attribusi ke LunaeKim99
+
+### Fixed
+
+- Unused import di pb_helper.dart
+- Analyzer issues (unused variables, prefer_final_fields)
+- Budget provider initialization di main.dart
+
 ## [1.6.0] - 2026-04-26
 
 ### Changed
