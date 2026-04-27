@@ -15,52 +15,63 @@ routerAdd("POST", "/api/create-snap-token", (c) => {
   const customerEmail = body.customer_email;
 
   if (!orderId || !amount || !customerName || !customerEmail) {
-    return c.json(400, { error: "Missing required fields: order_id, amount, customer_name, customer_email" });
+    return c.json(400, { error: "Field order_id, amount, customer_name, customer_email wajib diisi" });
   }
 
   const serverKey = $os.getenv("MIDTRANS_SERVER_KEY");
   const baseUrl = $os.getenv("MIDTRANS_BASE_URL");
 
   if (!serverKey || !baseUrl) {
-    return c.json(500, { error: "Midtrans not configured on server" });
+    return c.json(500, { error: "Konfigurasi Midtrans belum diatur di server" });
   }
 
   const credentials = btoa(serverKey + ":");
 
-  const res = $http.send({
-    url: baseUrl,
-    method: "POST",
-    headers: {
-      "Authorization": "Basic " + credentials,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      transaction_details: {
-        order_id: orderId,
-        gross_amount: parseInt(amount),
+  let res;
+  try {
+    res = $http.send({
+      url: baseUrl,
+      method: "POST",
+      headers: {
+        "Authorization": "Basic " + credentials,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
       },
-      customer_details: {
-        first_name: customerName,
-        email: customerEmail,
-      },
-      item_details: [{
-        id: "PREMIUM_PLAN",
-        price: parseInt(amount),
-        quantity: 1,
-        name: "UWANGKU Premium",
-      }],
-    }),
-  });
+      body: JSON.stringify({
+        transaction_details: {
+          order_id: orderId,
+          gross_amount: parseInt(amount),
+        },
+        customer_details: {
+          first_name: customerName,
+          email: customerEmail,
+        },
+        item_details: [{
+          id: "PREMIUM_PLAN",
+          price: parseInt(amount),
+          quantity: 1,
+          name: "UWANGKU Premium",
+        }],
+      }),
+      timeout: 30,
+    });
+  } catch (err) {
+    return c.json(502, { error: "Gagal terhubung ke Midtrans: " + err.toString() });
+  }
 
   if (res.statusCode >= 200 && res.statusCode < 300) {
     return c.json(200, res.json());
   }
-  
-  let errorMsg = "Midtrans error";
+
+  if (res.statusCode === 401) {
+    return c.json(401, { error: "Server key Midtrans tidak valid" });
+  }
+
+  let errorMsg = "Terjadi kesalahan";
   try {
     const resJson = res.json();
     errorMsg = resJson.status_message || JSON.stringify(resJson);
   } catch (e) {}
   
-  return c.json(res.statusCode, { error: errorMsg, statusCode: res.statusCode });
+  return c.json(res.statusCode, { error: errorMsg });
 }, $apis.requireAdminOrRecordAuth());
