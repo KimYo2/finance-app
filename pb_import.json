@@ -4,94 +4,407 @@
     "name": "transactions",
     "type": "base",
     "system": false,
-    "schema": [
-      {"id": "f1", "name": "title", "type": "text", "required": true},
-      {"id": "f2", "name": "amount", "type": "number", "required": true},
-      {"id": "f3", "name": "type", "type": "select", "required": true, "options": {"maxSelect": 1, "values": ["income", "expense"]}},
-      {"id": "f4", "name": "category", "type": "text", "required": true},
-      {"id": "f5", "name": "date", "type": "date", "required": true},
-      {"id": "f6", "name": "note", "type": "text", "required": false}
+    "fields": [
+      {
+        "id": "f1",
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "f2",
+        "name": "amount",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "noDecimal": false}
+      },
+      {
+        "id": "f3",
+        "name": "type",
+        "type": "select",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"maxSelect": 1, "values": ["income", "expense"]}
+      },
+      {
+        "id": "f4",
+        "name": "category",
+        "type": "text",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "f5",
+        "name": "date",
+        "type": "date",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": "", "max": ""}
+      },
+      {
+        "id": "f6",
+        "name": "note",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "f7",
+        "name": "user_id",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "f8",
+        "name": "is_synced",
+        "type": "bool",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
+      }
     ],
-    "listRule": "",
-    "createRule": "",
-    "updateRule": "",
-    "deleteRule": ""
+    "indexes": [],
+    "listRule": null,
+    "viewRule": null,
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null,
+    "options": {}
   },
   {
     "id": "categories_collection",
     "name": "categories",
     "type": "base",
     "system": false,
-    "schema": [
-      {"id": "c1", "name": "name", "type": "text", "required": true},
-      {"id": "c2", "name": "type", "type": "select", "required": true, "options": {"maxSelect": 1, "values": ["income", "expense"]}},
-      {"id": "c3", "name": "icon", "type": "text", "required": false},
-      {"id": "c4", "name": "color", "type": "text", "required": false},
-      {"id": "c5", "name": "is_default", "type": "bool", "required": false}
+    "fields": [
+      {
+        "id": "c1",
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "c2",
+        "name": "type",
+        "type": "select",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"maxSelect": 1, "values": ["income", "expense"]}
+      },
+      {
+        "id": "c3",
+        "name": "icon",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "c4",
+        "name": "color",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "c5",
+        "name": "is_default",
+        "type": "bool",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
+      }
     ],
-    "listRule": "",
-    "createRule": "",
-    "updateRule": "",
-    "deleteRule": ""
+    "indexes": [],
+    "listRule": null,
+    "viewRule": null,
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null,
+    "options": {}
   },
   {
     "id": "assets_collection",
     "name": "assets",
     "type": "base",
     "system": false,
-    "schema": [
-      {"id": "a1", "name": "name", "type": "text", "required": true},
-      {"id": "a2", "name": "type", "type": "select", "required": true, "options": {"maxSelect": 1, "values": ["cash", "bank", "investment", "property", "vehicle", "electronics", "other"]}},
-      {"id": "a3", "name": "amount", "type": "number", "required": true},
-      {"id": "a4", "name": "currency", "type": "text", "required": false},
-      {"id": "a5", "name": "purchase_date", "type": "date", "required": false},
-      {"id": "a6", "name": "note", "type": "text", "required": false},
-      {"id": "a7", "name": "is_active", "type": "bool", "required": false}
+    "fields": [
+      {
+        "id": "a1",
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "a2",
+        "name": "type",
+        "type": "select",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"maxSelect": 1, "values": ["cash", "bank", "investment", "property", "vehicle", "electronics", "other"]}
+      },
+      {
+        "id": "a3",
+        "name": "amount",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "noDecimal": false}
+      },
+      {
+        "id": "a4",
+        "name": "currency",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "a5",
+        "name": "purchase_date",
+        "type": "date",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": "", "max": ""}
+      },
+      {
+        "id": "a6",
+        "name": "note",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "a7",
+        "name": "is_active",
+        "type": "bool",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
+      }
     ],
-    "listRule": "",
-    "createRule": "",
-    "updateRule": "",
-    "deleteRule": ""
+    "indexes": [],
+    "listRule": null,
+    "viewRule": null,
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null,
+    "options": {}
   },
   {
     "id": "debts_collection",
     "name": "debts",
     "type": "base",
     "system": false,
-    "schema": [
-      {"id": "d1", "name": "title", "type": "text", "required": true},
-      {"id": "d2", "name": "type", "type": "select", "required": true, "options": {"maxSelect": 1, "values": ["hutang", "piutang"]}},
-      {"id": "d3", "name": "amount", "type": "number", "required": true},
-      {"id": "d4", "name": "remaining_amount", "type": "number", "required": false},
-      {"id": "d5", "name": "person_name", "type": "text", "required": false},
-      {"id": "d6", "name": "due_date", "type": "date", "required": false},
-      {"id": "d7", "name": "start_date", "type": "date", "required": false},
-      {"id": "d8", "name": "is_paid", "type": "bool", "required": false},
-      {"id": "d9", "name": "note", "type": "text", "required": false}
+    "fields": [
+      {
+        "id": "d1",
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "d2",
+        "name": "type",
+        "type": "select",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"maxSelect": 1, "values": ["hutang", "piutang"]}
+      },
+      {
+        "id": "d3",
+        "name": "amount",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "noDecimal": false}
+      },
+      {
+        "id": "d4",
+        "name": "remaining_amount",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "noDecimal": false}
+      },
+      {
+        "id": "d5",
+        "name": "person_name",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "d6",
+        "name": "due_date",
+        "type": "date",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": "", "max": ""}
+      },
+      {
+        "id": "d7",
+        "name": "start_date",
+        "type": "date",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": "", "max": ""}
+      },
+      {
+        "id": "d8",
+        "name": "is_paid",
+        "type": "bool",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
+      },
+      {
+        "id": "d9",
+        "name": "note",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      }
     ],
-    "listRule": "",
-    "createRule": "",
-    "updateRule": "",
-    "deleteRule": ""
+    "indexes": [],
+    "listRule": null,
+    "viewRule": null,
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null,
+    "options": {}
   },
   {
     "id": "budgets_collection",
     "name": "budgets",
     "type": "base",
     "system": false,
-    "schema": [
-      {"id": "b1", "name": "name", "type": "text", "required": true},
-      {"id": "b2", "name": "amount", "type": "number", "required": true},
-      {"id": "b3", "name": "spent", "type": "number", "required": false},
-      {"id": "b4", "name": "category", "type": "text", "required": false},
-      {"id": "b5", "name": "month", "type": "number", "required": true},
-      {"id": "b6", "name": "year", "type": "number", "required": true},
-      {"id": "b7", "name": "note", "type": "text", "required": false},
-      {"id": "b8", "name": "is_active", "type": "bool", "required": false}
+    "fields": [
+      {
+        "id": "b1",
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "b2",
+        "name": "amount",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "noDecimal": false}
+      },
+      {
+        "id": "b3",
+        "name": "spent",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "noDecimal": false}
+      },
+      {
+        "id": "b4",
+        "name": "category",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "b5",
+        "name": "month",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": 1, "max": 12, "noDecimal": true}
+      },
+      {
+        "id": "b6",
+        "name": "year",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": 2000, "max": 2100, "noDecimal": true}
+      },
+      {
+        "id": "b7",
+        "name": "note",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {"min": null, "max": null, "pattern": ""}
+      },
+      {
+        "id": "b8",
+        "name": "is_active",
+        "type": "bool",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
+      }
     ],
-    "listRule": "",
-    "createRule": "",
-    "updateRule": "",
-    "deleteRule": ""
+    "indexes": [],
+    "listRule": null,
+    "viewRule": null,
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null,
+    "options": {}
   }
 ]
