@@ -17,15 +17,15 @@ class AuthProvider extends ChangeNotifier {
   String get userEmail => _currentUser?.data['email'] as String? ?? '';
   String? get userAvatar => _currentUser?.data['avatarUrl'] as String?;
 
-  PocketBase get _pb => PbClient.instance;
-
   Future<void> initialize() async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      _isLoggedIn = _pb.authStore.isValid;
-      _currentUser = _pb.authStore.isValid ? _pb.authStore.record : null;
+      _isLoggedIn = PbClient.instance.authStore.isValid;
+      _currentUser = PbClient.instance.authStore.isValid
+          ? PbClient.instance.authStore.model as RecordModel?
+          : null;
     } catch (e) {
       debugPrint('[Auth] initialize error: $e');
       _isLoggedIn = false;
@@ -43,19 +43,21 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _pb.collection('users').authWithOAuth2(
+      await PbClient.instance.collection('users').authWithOAuth2(
         'google',
-        (Uri uri) {
-          launchUrl(uri, mode: LaunchMode.externalApplication);
+        (Uri url) async {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
         },
       );
 
-      _isLoggedIn = _pb.authStore.isValid;
-      _currentUser = _isLoggedIn ? _pb.authStore.record : null;
+      _isLoggedIn = PbClient.instance.authStore.isValid;
+      _currentUser = PbClient.instance.authStore.isValid
+          ? PbClient.instance.authStore.model as RecordModel?
+          : null;
       _isLoading = false;
       _errorMessage = null;
       notifyListeners();
-      return _isLoggedIn;
+      return true;
     } catch (e) {
       debugPrint('[Auth] signInWithGoogle error: $e');
       _isLoggedIn = false;
@@ -65,8 +67,13 @@ class AuthProvider extends ChangeNotifier {
       final msg = e.toString().toLowerCase();
       if (msg.contains('cancel')) {
         _errorMessage = 'Login dibatalkan';
-      } else if (msg.contains('network') || msg.contains('connection') || msg.contains('timeout')) {
-        _errorMessage = 'Tidak dapat terhubung ke server. Cek koneksi internet kamu';
+      } else if (msg.contains('network') ||
+          msg.contains('connection') ||
+          msg.contains('socket')) {
+        _errorMessage =
+            'Tidak dapat terhubung ke server. Periksa koneksi internet kamu';
+      } else if (msg.contains('timeout')) {
+        _errorMessage = 'Koneksi timeout. Coba lagi';
       } else {
         _errorMessage = 'Login gagal. Silakan coba lagi';
       }
@@ -77,9 +84,14 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    _pb.authStore.clear();
+    PbClient.instance.authStore.clear();
     _isLoggedIn = false;
     _currentUser = null;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  void clearError() {
     _errorMessage = null;
     notifyListeners();
   }
