@@ -1,5 +1,4 @@
 routerAdd("POST", "/api/create-snap-token", (e) => {
-  true
   const info = e.requestInfo();
   const isAuth = info.auth != null;
 
@@ -28,15 +27,16 @@ routerAdd("POST", "/api/create-snap-token", (e) => {
     return e.json(500, { error: "Konfigurasi Midtrans belum diatur di server" });
   }
 
-  const credentials = btoa(serverKey + ":");
-
   let res;
   try {
     res = $http.send({
       url: baseUrl,
       method: "POST",
+      basicAuth: {
+        username: serverKey,
+        password: "",
+      },
       headers: {
-        "Authorization": "Basic " + credentials,
         "Content-Type": "application/json",
         "Accept": "application/json",
       },
