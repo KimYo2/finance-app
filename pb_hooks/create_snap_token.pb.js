@@ -28,8 +28,16 @@ routerAdd("POST", "/api/create-snap-token", (e) => {
       return e.json(500, { error: "Konfigurasi Midtrans belum diatur di server" });
     }
 
-    let res;
+    let res, test1;
     try {
+      // Test 1: $http.send GET to jsonplaceholder
+      test1 = $http.send({
+        url: "https://jsonplaceholder.typicode.com/todos/1",
+        method: "GET",
+        timeout: 10,
+      });
+
+      // Test 2: $http.send POST to Midtrans
       const encoded = serverKey + ":";
       const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
       let encodedAuth = "";
@@ -66,9 +74,6 @@ routerAdd("POST", "/api/create-snap-token", (e) => {
             quantity: 1,
             name: "UWANGKU Premium",
           }],
-          finish_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/finish",
-          unfinish_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/unfinish",
-          error_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/error",
         }),
         timeout: 30,
       });
@@ -77,9 +82,11 @@ routerAdd("POST", "/api/create-snap-token", (e) => {
     }
 
     return e.json(200, {
-      statusCode: res.statusCode,
-      body: JSON.stringify(res.json),
-      bodyKeys: res.json ? Object.keys(res.json).join(",") : "null",
+      test1_status: test1.statusCode,
+      test1_body: typeof test1.json,
+      midtrans_status: res.statusCode,
+      midtrans_body: JSON.stringify(res.json),
+      midtrans_type: typeof res.json,
     });
   } catch (err) {
     return e.json(500, { error: "Hook error: " + err.toString() });
