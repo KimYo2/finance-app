@@ -228,9 +228,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
     await _voiceService.startListening(
       onResult: (result) {
+        final normalized = _voiceService.normalizeIndonesianNumbers(
+          result.recognizedWords,
+        );
         setState(() {
-          _recognizedWords = result.recognizedWords;
-          _textController.text = _recognizedWords;
+          _recognizedWords = normalized;
+          _textController.text = normalized;
         });
       },
       onListeningStart: () {
@@ -244,6 +247,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
           _recognizedWords = '';
           _sendTextMessage(words);
         }
+      },
+      onLocaleWarning: (message) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Tutup',
+              onPressed: () {},
+            ),
+          ),
+        );
       },
     );
   }
@@ -412,7 +428,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: const Color(0xFF4CAF50).withOpacity(0.12),
+                color: const Color(0xFF4CAF50).withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
@@ -604,10 +620,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: txColor.withOpacity(0.06),
+                  color: txColor.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: txColor.withOpacity(0.3),
+                    color: txColor.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                 ),
@@ -618,7 +634,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: txColor.withOpacity(0.12),
+                        color: txColor.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -686,7 +702,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.red,
                         side: BorderSide(
-                          color: Colors.red.withOpacity(0.4),
+                          color: Colors.red.withValues(alpha: 0.4),
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -788,7 +804,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50).withOpacity(0.1),
+                  color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -847,7 +863,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   boxShadow: [
                     BoxShadow(
                       color: (_isListening ? Colors.red : const Color(0xFF4CAF50))
-                          .withOpacity(0.3),
+                          .withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
