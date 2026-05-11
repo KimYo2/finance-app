@@ -65,7 +65,11 @@ class FinanceApp extends StatelessWidget {
           },
         ),
         ChangeNotifierProvider(
-          create: (_) => AuthProvider(),
+          create: (_) {
+            final provider = AuthProvider();
+            provider.initialize();
+            return provider;
+          },
         ),
       ],
       child: Consumer<ThemeProvider>(

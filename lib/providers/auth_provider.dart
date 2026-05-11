@@ -5,30 +5,29 @@ import '../services/pb_client.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool _isLoggedIn = false;
-  RecordModel? _currentUser;
-  bool _isLoading = true;
+  bool _isLoading = false;
   String? _errorMessage;
+  RecordModel? _currentUser;
 
   bool get isLoggedIn => _isLoggedIn;
-  RecordModel? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-
-  AuthProvider() {
-    checkAuthState();
-  }
+  RecordModel? get currentUser => _currentUser;
+  String get userName => _currentUser?.data['name'] as String? ?? 'Pengguna';
+  String get userEmail => _currentUser?.data['email'] as String? ?? '';
+  String? get userAvatar => _currentUser?.data['avatarUrl'] as String?;
 
   PocketBase get _pb => PbClient.instance;
 
-  Future<void> checkAuthState() async {
+  Future<void> initialize() async {
     _isLoading = true;
     notifyListeners();
 
     try {
       _isLoggedIn = _pb.authStore.isValid;
-      _currentUser = _pb.authStore.isValid ? _pb.authStore.model : null;
+      _currentUser = _pb.authStore.isValid ? _pb.authStore.model as RecordModel? : null;
     } catch (e) {
-      debugPrint('[Auth] checkAuthState error: $e');
+      debugPrint('[Auth] initialize error: $e');
       _isLoggedIn = false;
       _currentUser = null;
     }
@@ -44,18 +43,15 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final authData = await _pb.collection('users').authWithOAuth2(
+      final result = await _pb.collection('users').authWithOAuth2Code(
         'google',
         (url) async {
-          await _launchUrl(url);
-        },
-        createData: {
-          'name': '',
+          await launchUrl(url, mode: LaunchMode.externalApplication);
         },
       );
 
-      _isLoggedIn = authData != null && _pb.authStore.isValid;
-      _currentUser = _isLoggedIn ? _pb.authStore.model : null;
+      _isLoggedIn = result != null && _pb.authStore.isValid;
+      _currentUser = _isLoggedIn ? _pb.authStore.model as RecordModel? : null;
       _isLoading = false;
       _errorMessage = null;
       notifyListeners();
@@ -65,25 +61,18 @@ class AuthProvider extends ChangeNotifier {
       _isLoggedIn = false;
       _currentUser = null;
       _isLoading = false;
-      _errorMessage = 'Gagal masuk dengan Google. Coba lagi ya! 😅';
+
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('cancel')) {
+        _errorMessage = 'Login dibatalkan';
+      } else if (msg.contains('network') || msg.contains('connection') || msg.contains('timeout')) {
+        _errorMessage = 'Tidak dapat terhubung ke server. Cek koneksi internet kamu';
+      } else {
+        _errorMessage = 'Login gagal. Silakan coba lagi';
+      }
+
       notifyListeners();
       return false;
-    }
-  }
-
-  Future<void> _launchUrl(String url) async {
-    try {
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        _errorMessage = 'Tidak bisa membuka browser untuk login.';
-        notifyListeners();
-      }
-    } catch (e) {
-      debugPrint('[Auth] launchUrl error: $e');
-      _errorMessage = 'Gagal membuka halaman login.';
-      notifyListeners();
     }
   }
 
