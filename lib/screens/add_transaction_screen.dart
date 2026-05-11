@@ -200,7 +200,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
       decoration: BoxDecoration(
-        color: accentColor.withOpacity(0.08),
+        color: accentColor.withValues(alpha: 0.08),
       ),
       child: Column(
         children: [
@@ -210,7 +210,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             isExpense ? 'Pengeluaran' : 'Pemasukan',
             style: TextStyle(
               fontSize: 13,
-              color: accentColor.withOpacity(0.7),
+              color: accentColor.withValues(alpha: 0.7),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -227,7 +227,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w500,
-                    color: accentColor.withOpacity(0.6),
+                    color: accentColor.withValues(alpha: 0.6),
                   ),
                 ),
                 IntrinsicWidth(
@@ -247,7 +247,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       hintStyle: TextStyle(
                         fontSize: 42,
                         fontWeight: FontWeight.bold,
-                        color: accentColor.withOpacity(0.25),
+                        color: accentColor.withValues(alpha: 0.25),
                       ),
                       border: InputBorder.none,
                       isDense: true,
@@ -284,7 +284,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       height: 44,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.06),
+        color: Colors.black.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(50),
       ),
       child: Row(
@@ -333,7 +333,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withValues(alpha: 0.08),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -377,7 +377,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: accentColor.withOpacity(0.1),
+                color: accentColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
@@ -566,7 +566,7 @@ color: _transactionType == TransactionType.expense
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: accentColor.withOpacity(0.1),
+                color: accentColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
@@ -616,7 +616,7 @@ color: _transactionType == TransactionType.expense
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -654,7 +654,7 @@ color: _transactionType == TransactionType.expense
     return Divider(
       height: 1,
       thickness: 0.5,
-      color: Colors.grey.withOpacity(0.2),
+      color: Colors.grey.withValues(alpha: 0.2),
       indent: 52,
     );
   }
@@ -814,7 +814,7 @@ color: _transactionType == TransactionType.expense
           foregroundColor: isValid ? Colors.white : Colors.grey,
           minimumSize: const Size(double.infinity, 54),
           elevation: isValid ? 2 : 0,
-          shadowColor: accentColor.withOpacity(0.4),
+          shadowColor: accentColor.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),

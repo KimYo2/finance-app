@@ -191,7 +191,7 @@ class VoiceService {
 
   int _pow10(int n) {
     int r = 1;
-    for (int i = 0; i < n; i++) r *= 10;
+    for (int i = 0; i < n; i++) { r *= 10; }
     return r;
   }
 

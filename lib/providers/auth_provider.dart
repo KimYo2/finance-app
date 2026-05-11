@@ -25,7 +25,7 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       _isLoggedIn = _pb.authStore.isValid;
-      _currentUser = _pb.authStore.isValid ? _pb.authStore.model as RecordModel? : null;
+      _currentUser = _pb.authStore.isValid ? _pb.authStore.record : null;
     } catch (e) {
       debugPrint('[Auth] initialize error: $e');
       _isLoggedIn = false;
@@ -43,15 +43,15 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _pb.collection('users').authWithOAuth2Code(
+      await _pb.collection('users').authWithOAuth2(
         'google',
-        (url) async {
-          await launchUrl(url, mode: LaunchMode.externalApplication);
+        (Uri uri) {
+          launchUrl(uri, mode: LaunchMode.externalApplication);
         },
       );
 
-      _isLoggedIn = result != null && _pb.authStore.isValid;
-      _currentUser = _isLoggedIn ? _pb.authStore.model as RecordModel? : null;
+      _isLoggedIn = _pb.authStore.isValid;
+      _currentUser = _isLoggedIn ? _pb.authStore.record : null;
       _isLoading = false;
       _errorMessage = null;
       notifyListeners();

@@ -123,7 +123,7 @@ class LoginScreen extends StatelessWidget {
                               'assets/images/google_logo.png',
                               width: 20,
                               height: 20,
-                              errorBuilder: (_, __, ___) => const Icon(
+                              errorBuilder: (_, _, _) => const Icon(
                                 Icons.g_mobiledata,
                                 size: 24,
                               ),
