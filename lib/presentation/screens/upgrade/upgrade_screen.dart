@@ -390,7 +390,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
   }
 
   Widget _buildPayButton(bool isIOS) {
-    final price = _selectedPlan == PremiumPlan.monthly ? 49000 : 399000;
+    final price = _selectedPlan == PremiumPlan.monthly ? 49000 : 249000;
 
     return SizedBox(
       width: double.infinity,
@@ -546,7 +546,9 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
       debugPrint('[Payment] isConfigured: ${midtrans.isConfigured}');
 
       if (!midtrans.isConfigured) {
-        throw Exception('Server pembayaran tidak dikonfigurasi. Hubungi administrator.');
+        throw Exception(
+          'Server pembayaran tidak dikonfigurasi. Hubungi administrator.',
+        );
       }
 
       setState(() => _loadingMessage = 'Membuat sesi pembayaran...');
@@ -593,8 +595,10 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
         if (e.toString().contains('SocketException') ||
             e.toString().contains('Connection refused') ||
             e.toString().contains('Failed host lookup')) {
-          errorMessage = 'Tidak dapat terhubung ke server.\nPastikan koneksi internet kamu aktif.';
-        } else if (e.toString().contains('401') || e.toString().contains('403')) {
+          errorMessage =
+              'Tidak dapat terhubung ke server.\nPastikan koneksi internet kamu aktif.';
+        } else if (e.toString().contains('401') ||
+            e.toString().contains('403')) {
           errorMessage = 'Autentikasi server gagal.\nHubungi administrator.';
         } else if (e.toString().contains('500')) {
           errorMessage = 'Server sedang bermasalah.\nCoba lagi beberapa saat.';
@@ -618,10 +622,7 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
                 ),
               ],
             ),
-            content: Text(
-              errorMessage,
-              style: const TextStyle(fontSize: 14),
-            ),
+            content: Text(errorMessage, style: const TextStyle(fontSize: 14)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
