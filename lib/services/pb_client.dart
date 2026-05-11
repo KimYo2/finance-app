@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:pocketbase/pocketbase.dart';
-import '../config/app_config.dart';
+import '../core/config/app_config.dart';
 
 class _NgrokHttpClient extends http.BaseClient {
   final http.Client _inner = http.Client();

@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2026-05-11
+
+### Changed
+
+- **Clean Architecture Refactor** — Restrukturasi total dari struktur flat ke Clean Architecture
+  - `main.dart` dipisah menjadi 3 file: `main.dart` (bootstrap), `app/app.dart` (FinanceApp), `app/app_shell.dart` (AppShell)
+  - Layer baru: `domain/` — entities, abstract repository interfaces, use cases
+  - Layer baru: `core/` — config, constants, error handler, theme, utils
+  - `data/` layer — models, datasources (local + remote), repository implementations
+  - `presentation/` — providers, screens (organized per fitur), widgets (organized per fitur)
+  - Layer dependency rule: `presentation → domain ← data`, `core` berdiri sendiri
+  - Barrel exports (`index.dart`) di setiap folder untuk import yang lebih rapi
+  - ThemeData dipisah dari `main.dart` ke `core/theme/app_theme.dart`
+  - Semua import paths diupdate, 0 error flutter analyze
+  - Tidak ada perubahan fungsionalitas — murni refactor struktur
+
 ## [1.8.1] - 2026-05-11
 
 ### Fixed

@@ -1,5 +1,5 @@
-import 'package:uwangku/models/transaction_model.dart';
-import 'package:uwangku/models/transaction_type.dart';
+import 'package:uwangku/data/models/transaction_model.dart';
+import 'package:uwangku/data/models/transaction_type.dart';
 
 TransactionModel makeTransaction({
   String? id,

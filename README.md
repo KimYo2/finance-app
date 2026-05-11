@@ -1,4 +1,4 @@
-# UWANGKU v1.8.1
+# UWANGKU v2.0.0
 
 Aplikasi Asisten Keuangan Pribadi Berbasis AI menggunakan Flutter dengan dukungan penuh untuk Android dan iOS.
 
@@ -42,6 +42,7 @@ Bayar via Midtrans Snap (WebView)
 ## Teknologi
 
 - Flutter SDK ^3.11.4
+- Clean Architecture (domain/data/presentation layers)
 - Provider (state management)
 - SQLite + PocketBase (dual storage with SmartDbHelper auto-switch)
 - fl_chart (charts)
@@ -52,59 +53,51 @@ Bayar via Midtrans Snap (WebView)
 - Midtrans Snap (payment)
 - Flutter WebView
 
-## Struktur Proyek
+## Struktur Proyek (Clean Architecture)
 
 ```
 lib/
-├── main.dart                  # Entry point & routing
-├── config/
-│   ├── app_config.dart        # API keys & environment config
-│   └── app_config.dart.example
-├── database/
-│   ├── db_interface.dart     # Abstract storage interface
-│   ├── pb_helper.dart        # PocketBase implementation
-│   ├── sqlite_helper.dart   # SQLite implementation
-│   ├── smart_db_helper.dart # Auto-switch strategy (PRIMARY storage)
-│   └── sync_queue_helper.dart # Offline operation queue
-├── models/
-│   ├── transaction_model.dart
-│   ├── asset_model.dart
-│   ├── debt_model.dart
-│   ├── budget_model.dart
-│   ├── usage_model.dart      # Usage limit tracking
-│   └── payment_model.dart    # Payment enums
-├── providers/
-│   ├── transaction_provider.dart
-│   ├── budget_provider.dart
-│   ├── theme_provider.dart  # Dark mode management
-│   └── usage_provider.dart  # Premium status & limits
-├── screens/
-│   ├── splash_screen.dart   # Animated splash + connection status
-│   ├── dashboard_screen.dart
-│   ├── add_transaction_screen.dart
-│   ├── history_screen.dart
-│   ├── budget_screen.dart
-│   ├── report_screen.dart    # Weekly summary (Premium)
-│   ├── ai_chat_screen.dart  # AI chat with voice & OCR
-│   ├── upgrade_screen.dart   # Premium upgrade UI
-│   ├── payment_webview_screen.dart  # Midtrans WebView
-│   ├── export_screen.dart  # PDF/CSV export (Premium)
-│   └── receipt_review_screen.dart  # Scan result review
-├── services/
-│   ├── pb_client.dart        # PocketBase client (Ngrok-aware)
-│   ├── ai_service.dart     # Groq AI integration
-│   ├── voice_service.dart  # Speech-to-text
-│   ├── ocr_service.dart    # ML Kit text recognition
-│   ├── midtrans_service.dart  # Snap token generation
-│   ├── export_service.dart   # PDF/CSV export
-│   └── receipt_scan_service.dart  # Receipt OCR + AI
-├── widgets/
-│   ├── transaction_card.dart
-│   └── budget_progress_card.dart
-└── utils/
-    ├── app_theme.dart       # Theme colors (light/dark)
-    ├── error_handler.dart
-    └── platform_helper.dart
+├── main.dart                      # Bootstrap (runApp only)
+├── app/
+│   ├── app.dart                   # FinanceApp root widget
+│   └── app_shell.dart             # AppShell + bottom nav
+├── core/                          # Cross-cutting concerns
+│   ├── config/app_config.dart
+│   ├── constants/
+│   ├── error/error_handler.dart
+│   ├── theme/app_theme.dart
+│   └── utils/platform_helper.dart
+├── domain/                        # Pure business logic
+│   ├── entities/                  # Transaction, Budget
+│   ├── repositories/             # Abstract interfaces
+│   └── usecases/                 # Auth, Transaction, Budget
+├── data/                          # Implementation layer
+│   ├── models/                    # Transaction, Budget, Asset, Debt, etc.
+│   ├── datasources/
+│   │   ├── local/sqlite_helper.dart
+│   │   ├── remote/               # AI, OCR, Export, Midtrans, etc.
+│   │   ├── db_interface.dart
+│   │   ├── pb_helper.dart
+│   │   ├── smart_db_helper.dart
+│   │   └── sync_queue_helper.dart
+│   └── repositories/             # Repository implementations
+├── presentation/                  # Flutter UI layer
+│   ├── providers/                 # Auth, Budget, Theme, Transaction, Usage
+│   ├── screens/
+│   │   ├── auth/                  # Login, Splash
+│   │   ├── dashboard/
+│   │   ├── transaction/           # Add, History
+│   │   ├── budget/
+│   │   ├── report/
+│   │   ├── ai_chat/
+│   │   ├── export_import/
+│   │   ├── receipt/
+│   │   └── upgrade/               # Upgrade, PaymentWebview
+│   └── widgets/
+│       ├── budget/
+│       └── transaction/
+└── services/
+    └── pb_client.dart             # PocketBase client
 ```
 
 ## Storage Layer

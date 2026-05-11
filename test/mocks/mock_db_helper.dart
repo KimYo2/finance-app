@@ -1,8 +1,8 @@
-import 'package:uwangku/database/db_interface.dart';
-import 'package:uwangku/models/transaction_model.dart';
-import 'package:uwangku/models/asset_model.dart';
-import 'package:uwangku/models/debt_model.dart';
-import 'package:uwangku/models/budget_model.dart';
+import 'package:uwangku/data/datasources/db_interface.dart';
+import 'package:uwangku/data/models/transaction_model.dart';
+import 'package:uwangku/data/models/asset_model.dart';
+import 'package:uwangku/data/models/debt_model.dart';
+import 'package:uwangku/data/models/budget_model.dart';
 
 class MockDbHelper implements DbInterface {
   final List<TransactionModel> _transactions = [];
