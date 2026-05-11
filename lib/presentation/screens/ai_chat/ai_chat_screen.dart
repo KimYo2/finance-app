@@ -46,7 +46,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
   final AiService _aiService = AiService();
   final VoiceService _voiceService = VoiceService();
   final OcrService _ocrService = OcrService();
-  bool _isLoading = false;
   bool _isListening = false;
   String _recognizedWords = '';
 
@@ -154,16 +153,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
       ),
     );
 
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
       final response = await _aiService.sendMessage(text, DateTime.now());
 
       setState(() {
         _messages.removeLast();
-        _isLoading = false;
       });
       
       await usageProvider.incrementAiText();
@@ -189,7 +183,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
     } catch (e) {
       setState(() {
         _messages.removeLast();
-        _isLoading = false;
       });
 
       if (!_aiService.isInitialized) {
