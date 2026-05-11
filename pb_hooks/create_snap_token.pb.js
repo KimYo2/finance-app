@@ -76,8 +76,11 @@ routerAdd("POST", "/api/create-snap-token", (e) => {
       return e.json(502, { error: "Gagal terhubung ke Midtrans: " + err.toString() });
     }
 
-    const j = typeof res.json;
-    return e.json(200, { statusCode: res.statusCode, hasJson: j != "undefined", jsonType: j, bodyType: typeof res.body });
+    return e.json(200, {
+      statusCode: res.statusCode,
+      body: JSON.stringify(res.json),
+      bodyKeys: res.json ? Object.keys(res.json).join(",") : "null",
+    });
   } catch (err) {
     return e.json(500, { error: "Hook error: " + err.toString() });
   }
