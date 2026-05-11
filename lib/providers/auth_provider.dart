@@ -48,6 +48,10 @@ class AuthProvider extends ChangeNotifier {
         (Uri url) async {
           await launchUrl(url, mode: LaunchMode.inAppBrowserView);
         },
+        query: {
+          'redirectUrl':
+              'https://equator-untainted-stank.ngrok-free.dev/_oauth/providers/google/callback',
+        },
       );
 
       _isLoggedIn = PbClient.instance.authStore.isValid;
