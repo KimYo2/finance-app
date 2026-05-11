@@ -51,7 +51,7 @@ routerAdd("POST", "/api/create-snap-token", (e) => {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: {
+        body: JSON.stringify({
           transaction_details: {
             order_id: orderId,
             gross_amount: parseInt(amount),
@@ -69,28 +69,15 @@ routerAdd("POST", "/api/create-snap-token", (e) => {
           finish_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/finish",
           unfinish_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/unfinish",
           error_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/error",
-        },
+        }),
         timeout: 30,
       });
     } catch (err) {
       return e.json(502, { error: "Gagal terhubung ke Midtrans: " + err.toString() });
     }
 
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      return e.json(200, res.json);
-    }
-
-    if (res.statusCode === 401) {
-      return e.json(401, { error: "Server key Midtrans tidak valid" });
-    }
-
-    let errorMsg = "Terjadi kesalahan";
-    try {
-      const resJson = res.json;
-      errorMsg = (resJson && resJson.status_message) || JSON.stringify(resJson);
-    } catch (err2) {}
-
-    return e.json(res.statusCode, { error: errorMsg });
+    const j = typeof res.json;
+    return e.json(200, { statusCode: res.statusCode, hasJson: j != "undefined", jsonType: j, bodyType: typeof res.body });
   } catch (err) {
     return e.json(500, { error: "Hook error: " + err.toString() });
   }
