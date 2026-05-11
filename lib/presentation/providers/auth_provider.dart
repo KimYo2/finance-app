@@ -53,7 +53,7 @@ class AuthProvider extends ChangeNotifier {
         },
         query: {
           'redirectUrl':
-              'https://equator-untainted-stank.ngrok-free.dev/_oauth/providers/google/callback',
+              'com.example.uangku://oauth/callback',
         },
       );
 
