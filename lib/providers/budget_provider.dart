@@ -1,9 +1,15 @@
 import 'package:flutter/foundation.dart';
+import '../database/db_interface.dart';
+import '../database/smart_db_helper.dart';
+import '../database/pb_helper.dart';
 import '../database/sqlite_helper.dart';
 import '../models/budget_model.dart';
 
 class BudgetProvider extends ChangeNotifier {
-  final SqliteHelper _dbHelper = SqliteHelper();
+  late final DbInterface _dbHelper = SmartDbHelper(
+    remote: PbHelper(),
+    local: SqliteHelper(),
+  );
   List<BudgetModel> _budgets = [];
   bool _isLoading = false;
 
@@ -11,6 +17,7 @@ class BudgetProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> initialize() async {
+    await _dbHelper.initialize();
     await loadBudgets();
   }
 
@@ -82,7 +89,11 @@ class BudgetProvider extends ChangeNotifier {
   BudgetModel? getBudgetForCategory(String category, int month, int year) {
     try {
       return _budgets.firstWhere(
-        (b) => b.category == category && b.month == month && b.year == year && b.isActive,
+        (b) =>
+            b.category == category &&
+            b.month == month &&
+            b.year == year &&
+            b.isActive,
       );
     } catch (e) {
       return null;
@@ -90,10 +101,17 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   List<BudgetModel> getBudgetsForMonth(int month, int year) {
-    return _budgets.where((b) => b.month == month && b.year == year && b.isActive).toList();
+    return _budgets
+        .where((b) => b.month == month && b.year == year && b.isActive)
+        .toList();
   }
 
-  double getBudgetUsagePercent(String category, int month, int year, double spent) {
+  double getBudgetUsagePercent(
+    String category,
+    int month,
+    int year,
+    double spent,
+  ) {
     final budget = getBudgetForCategory(category, month, year);
     if (budget == null || budget.amount <= 0) return 0;
     return (spent / budget.amount) * 100;
@@ -108,7 +126,11 @@ class BudgetProvider extends ChangeNotifier {
     return percent >= 80 && percent < 100;
   }
 
-  List<Map<String, dynamic>> getBudgetSummary(int month, int year, Map<String, double> categoryTotals) {
+  List<Map<String, dynamic>> getBudgetSummary(
+    int month,
+    int year,
+    Map<String, double> categoryTotals,
+  ) {
     final monthBudgets = getBudgetsForMonth(month, year);
     final summary = <Map<String, dynamic>>[];
 
@@ -125,7 +147,8 @@ class BudgetProvider extends ChangeNotifier {
       });
     }
 
-    summary.sort((a, b) => (b['percent'] as double).compareTo(a['percent'] as double));
+    summary
+        .sort((a, b) => (b['percent'] as double).compareTo(a['percent'] as double));
     return summary;
   }
 }

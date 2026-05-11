@@ -1,22 +1,18 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
-import '../database/db_interface.dart';
+import '../database/smart_db_helper.dart';
+import '../database/pb_helper.dart';
 import '../database/sqlite_helper.dart';
-import '../database/sync_queue_helper.dart';
 import '../models/transaction_model.dart';
 import '../models/transaction_type.dart';
 
 class TransactionProvider extends ChangeNotifier {
-  DbInterface _dbHelper = SqliteHelper();
+  late final SmartDbHelper _dbHelper;
   final Connectivity _connectivity = Connectivity();
-  final SyncQueueHelper _syncQueue = SyncQueueHelper();
-  
+
   List<TransactionModel> _transactions = [];
   bool _isLoading = false;
   String? _errorMessage;
-  bool _isOnline = true;
-  final bool _isSyncing = false;
-  bool _isUsingRemoteStorage = false;
 
   void Function(String message)? onError;
   void Function(String message)? onSuccess;
@@ -24,101 +20,25 @@ class TransactionProvider extends ChangeNotifier {
   List<TransactionModel> get allTransactions => _transactions;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  bool get isOnline => _isOnline;
-  bool get isSyncing => _isSyncing;
-  bool get isUsingRemoteStorage => _isUsingRemoteStorage;
+  bool get isOnline => _dbHelper.isRemoteAvailable;
+  bool get isUsingRemoteStorage => _dbHelper.isRemoteAvailable;
+
+  TransactionProvider() {
+    _dbHelper = SmartDbHelper(remote: PbHelper(), local: SqliteHelper());
+  }
 
   Future<void> initialize() async {
     await _dbHelper.initialize();
-    await checkConnectivity();
-    await _loadFromQueue();
-  }
 
-  void setUseRemoteStorage(bool value) {
-    _isUsingRemoteStorage = value;
-  }
+    _dbHelper.connectivityStream.listen((_) {
+      notifyListeners();
+    });
 
-  Future<void> checkConnectivity() async {
-    final result = await _connectivity.checkConnectivity();
-    _isOnline = !result.contains(ConnectivityResult.none);
-    notifyListeners();
-  }
+    _connectivity.onConnectivityChanged.listen((_) {
+      _dbHelper.refreshConnectivity();
+    });
 
-  void switchStorage(DbInterface newStorage) {
-    _dbHelper = newStorage;
-    _isUsingRemoteStorage = newStorage is! SqliteHelper;
-    initialize();
-  }
-
-  Future<void> _loadFromQueue() async {
-    final pending = await _syncQueue.getPendingItems();
-    for (final item in pending) {
-      if (item['collection'] == 'transactions') {
-        try {
-          final payload = _parsePayload(item['payload'] as String);
-          final id = 'local_${item['id']}';
-          final transaction = TransactionModel.fromMap(payload);
-          final localTransaction = transaction.copyWith(id: id, isSynced: false);
-          
-          final existingIndex = _transactions.indexWhere((t) => t.id == id);
-          if (existingIndex == -1) {
-            _transactions.insert(0, localTransaction);
-          }
-        } catch (e) {
-          debugPrint('[TransactionProvider] Error loading from queue: $e');
-        }
-      }
-    }
-    notifyListeners();
-  }
-
-  Map<String, dynamic> _parsePayload(String payloadStr) {
-    try {
-      final cleanStr = payloadStr
-          .replaceAll('{', '')
-          .replaceAll('}', '')
-          .replaceAll(' ', '');
-      
-      final Map<String, dynamic> result = {};
-      final pairs = cleanStr.split(',');
-      for (final pair in pairs) {
-        final kv = pair.split(':');
-        if (kv.length == 2) {
-          final key = kv[0].trim();
-          var value = kv[1].trim();
-          if (value.startsWith('"') && value.endsWith('"')) {
-            value = value.substring(1, value.length - 1);
-          }
-          result[key] = value;
-        }
-      }
-      return result;
-    } catch (e) {
-      return {};
-    }
-  }
-
-  Future<bool> _requiresOnline() async {
-    if (_dbHelper is SqliteHelper || !_isUsingRemoteStorage) {
-      _isOnline = true;
-      return true;
-    }
-    await checkConnectivity();
-    if (!_isOnline) {
-      return false;
-    }
-    return true;
-  }
-
-  void _setError(String message) {
-    _errorMessage = message;
-    onError?.call(message);
-    notifyListeners();
-  }
-
-  void _setSuccess(String message) {
-    onSuccess?.call(message);
-    notifyListeners();
+    await loadTransactions();
   }
 
   Future<void> loadTransactions() async {
@@ -127,16 +47,7 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (_isUsingRemoteStorage && !await _requiresOnline()) {
-        await _loadFromQueue();
-        _isLoading = false;
-        notifyListeners();
-        return;
-      }
-      
       _transactions = await _dbHelper.fetchAllTransactions();
-      
-      await _loadFromQueue();
     } catch (e) {
       _setError(e.toString());
       debugPrint('Error loading transactions: $e');
@@ -147,16 +58,6 @@ class TransactionProvider extends ChangeNotifier {
   }
 
   Future<bool> addTransaction(TransactionModel transaction) async {
-    if (_isUsingRemoteStorage && !await _requiresOnline()) {
-      await _queueTransaction('create', transaction);
-      final tempId = 'local_${DateTime.now().millisecondsSinceEpoch}';
-      final localTransaction = transaction.copyWith(id: tempId, isSynced: false);
-      _transactions.insert(0, localTransaction);
-      _setSuccess('Transaksi disimpan (offline, akan sync nanti)');
-      notifyListeners();
-      return true;
-    }
-
     try {
       final newTransaction = await _dbHelper.createTransaction(transaction);
       _transactions.insert(0, newTransaction);
@@ -170,22 +71,7 @@ class TransactionProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _queueTransaction(String operation, TransactionModel transaction) async {
-    final payload = transaction.toMap();
-    payload['id'] = transaction.id ?? '';
-    await _syncQueue.enqueue(operation, 'transactions', payload);
-  }
-
   Future<bool> deleteTransaction(String id) async {
-    if (_isUsingRemoteStorage && !await _requiresOnline()) {
-      final transaction = _transactions.firstWhere((t) => t.id == id);
-      await _queueTransaction('delete', transaction);
-      _transactions.removeWhere((t) => t.id == id);
-      _setSuccess('Transaksi dihapus (offline, akan sync nanti)');
-      notifyListeners();
-      return true;
-    }
-
     try {
       await _dbHelper.deleteTransaction(id);
       _transactions.removeWhere((t) => t.id == id);
@@ -200,24 +86,16 @@ class TransactionProvider extends ChangeNotifier {
   }
 
   Future<bool> updateTransaction(TransactionModel transaction) async {
-    if (_isUsingRemoteStorage && !await _requiresOnline()) {
-      await _queueTransaction('update', transaction);
-      final index = _transactions.indexWhere((t) => t.id == transaction.id);
-      if (index != -1) {
-        _transactions[index] = transaction.copyWith(isSynced: false);
-        _setSuccess('Transaksi diperbarui (offline, akan sync nanti)');
-        notifyListeners();
-      }
-      return true;
-    }
-
     try {
       final transactionId = transaction.safeId;
       if (transactionId.isEmpty) {
         _setError('Transaction ID is required for update');
         return false;
       }
-      final updatedTransaction = await _dbHelper.updateTransaction(transactionId, transaction);
+      final updatedTransaction = await _dbHelper.updateTransaction(
+        transactionId,
+        transaction,
+      );
       final index = _transactions.indexWhere((t) => t.id == transaction.id);
       if (index != -1) {
         _transactions[index] = updatedTransaction;
@@ -230,6 +108,17 @@ class TransactionProvider extends ChangeNotifier {
       debugPrint('Error updating transaction: $e');
       return false;
     }
+  }
+
+  void _setError(String message) {
+    _errorMessage = message;
+    onError?.call(message);
+    notifyListeners();
+  }
+
+  void _setSuccess(String message) {
+    onSuccess?.call(message);
+    notifyListeners();
   }
 
   void markTransactionSynced(String? id) {

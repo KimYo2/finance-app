@@ -58,7 +58,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (!provider.isOnline) _buildOfflineBanner(isIOS),
+                if (provider.isUsingRemoteStorage)
+                  _buildOnlineIndicator()
+                else
+                  _buildOfflineBanner(isIOS),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
@@ -546,6 +549,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _buildOnlineIndicator() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xFF4CAF50),
+            ),
+          ),
+          const SizedBox(width: 6),
+          const Text(
+            '☁ Online',
+            style: TextStyle(
+              color: Color(0xFF4CAF50),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildOfflineBanner(bool isIOS) {
     return Container(
       width: double.infinity,
@@ -565,7 +598,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(width: 8),
           const Text(
-            'Tidak ada koneksi internet',
+            '📴 Offline',
             style: TextStyle(
               color: Colors.orange,
               fontSize: 13,

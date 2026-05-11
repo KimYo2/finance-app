@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../main.dart';
+import '../providers/transaction_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -140,6 +142,36 @@ class _SplashScreenState extends State<SplashScreen>
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+            ),
+            const SizedBox(height: 24),
+            Consumer<TransactionProvider>(
+              builder: (context, provider, _) {
+                final isConnected = provider.isUsingRemoteStorage;
+                return FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isConnected ? Colors.green : Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isConnected ? 'Tersambung ke server' : 'Mode offline',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isConnected ? Colors.green : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         ),

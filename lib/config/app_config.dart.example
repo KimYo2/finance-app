@@ -17,9 +17,12 @@ class AppConfig {
   // Device fisik      : http://192.168.x.x:8090
   // Ngrok tunnel      : https://xxxx.ngrok-free.dev
   // Production        : https://api.uwangku.com
+  //
+  // Current Ngrok tunnel URL (update if tunnel changes):
+  // https://equator-untainted-stank.ngrok-free.dev
   static const String pbBaseUrl = String.fromEnvironment(
     'PB_BASE_URL',
-    defaultValue: 'http://10.0.2.2:8090',
+    defaultValue: 'https://equator-untainted-stank.ngrok-free.dev',
   );
 
   // ===== MIDTRANS =====

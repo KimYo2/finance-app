@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -52,7 +53,7 @@ class SyncQueueHelper {
     return await db.insert('sync_queue', {
       'operation': operation,
       'collection': collection,
-      'payload': payload.toString(),
+      'payload': jsonEncode(payload),
       'created_at': DateTime.now().toIso8601String(),
       'synced': 0,
       'retry_count': 0,
