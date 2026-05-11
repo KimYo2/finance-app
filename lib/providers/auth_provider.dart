@@ -46,7 +46,14 @@ class AuthProvider extends ChangeNotifier {
       await PbClient.instance.collection('users').authWithOAuth2(
         'google',
         (Uri url) async {
-          await launchUrl(url, mode: LaunchMode.inAppBrowserView);
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView,
+            webViewConfiguration: const WebViewConfiguration(
+              enableJavaScript: true,
+              enableDomStorage: true,
+            ),
+          );
         },
         query: {
           'redirectUrl':
