@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../main.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -106,7 +107,17 @@ class LoginScreen extends StatelessWidget {
                           width: double.infinity,
                           height: 52,
                           child: OutlinedButton.icon(
-                            onPressed: () => auth.signInWithGoogle(),
+                            onPressed: () async {
+                              final success = await auth.signInWithGoogle();
+                              if (success && context.mounted) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const AppShell(),
+                                  ),
+                                );
+                              }
+                            },
                             style: OutlinedButton.styleFrom(
                               backgroundColor: Colors.white,
                               foregroundColor: Colors.black87,
