@@ -57,6 +57,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   void initState() {
     super.initState();
+    _amountController.addListener(() => setState(() {}));
     final existing = widget.existingTransaction;
     if (existing != null) {
       _amountController.text = existing.amount.toStringAsFixed(0);
@@ -801,7 +802,8 @@ color: _transactionType == TransactionType.expense
   Widget _buildSubmitButton() {
     final isExpense = _transactionType == TransactionType.expense;
     final accentColor = isExpense ? Colors.red : const Color(0xFF4CAF50);
-    final isValid = _amountController.text.isNotEmpty;
+    final cleanAmount = _amountController.text.replaceAll(RegExp(r'[^\d]'), '');
+    final isValid = cleanAmount.isNotEmpty && (double.tryParse(cleanAmount) ?? 0) > 0;
 
     return SizedBox(
       height: 54,
