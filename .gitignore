@@ -39,7 +39,7 @@ node_modules/
 build/
 coverage/
 .env
-lib/config/app_config.dart
+lib/core/config/app_config.dart
 
 # Symbolication related
 app.*.symbols

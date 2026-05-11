@@ -1,4 +1,4 @@
-// lib/config/app_config.dart.example
+// lib/core/config/app_config.dart.example
 // COPY file ini menjadi app_config.dart
 // lalu isi dengan API key kamu yang asli
 // JANGAN commit app_config.dart ke repo!
