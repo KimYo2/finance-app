@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:pocketbase/pocketbase.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../data/models/payment_model.dart';
 import '../../../services/pb_client.dart';
 
@@ -79,9 +80,9 @@ class MidtransService {
   }
 
   String getSnapUrl(String snapToken) {
-    final snapUrl = _pbBaseUrl.contains('sandbox') || _pbBaseUrl.isEmpty
-        ? 'https://app.sandbox.midtrans.com/snap/v2/vtweb'
-        : 'https://app.midtrans.com/snap/v2/vtweb';
+    final snapUrl = AppConfig.isProduction
+        ? 'https://app.midtrans.com/snap/v2/vtweb'
+        : 'https://app.sandbox.midtrans.com/snap/v2/vtweb';
     return '$snapUrl/$snapToken';
   }
 

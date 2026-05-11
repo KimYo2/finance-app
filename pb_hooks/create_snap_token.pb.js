@@ -1,28 +1,31 @@
-// PocketBase hook for creating Midtrans Snap token
-// This runs server-side to protect the Midtrans server key
-// 
-// To enable this hook:
-// 1. Place this file in your PocketBase hooks directory
-// 2. Set environment variables:
-//    - MIDTRANS_SERVER_KEY (your Midtrans server key)
-//    - MIDTRANS_BASE_URL (e.g., https://app.sandbox.midtrans.com/snap/v1/transactions)
+routerAdd("POST", "/api/create-snap-token", (e) => {
+  true
+  const info = e.requestInfo();
+  const isAuth = info.auth != null;
 
-routerAdd("POST", "/api/create-snap-token", (c) => {
-  const body = $apis.requestInfo(c).data;
-  const orderId = body.order_id;
-  const amount = body.amount;
-  const customerName = body.customer_name;
+  if (!isAuth) {
+    return e.json(401, { error: "Unauthorized" });
+  }
+
+  const body = info.body;
+
+  const orderId       = body.order_id;
+  const amount        = body.amount;
+  const customerName  = body.customer_name;
   const customerEmail = body.customer_email;
 
   if (!orderId || !amount || !customerName || !customerEmail) {
-    return c.json(400, { error: "Field order_id, amount, customer_name, customer_email wajib diisi" });
+    return e.json(400, {
+      error: "Field order_id, amount, customer_name, customer_email wajib diisi",
+      received: JSON.stringify(body)
+    });
   }
 
   const serverKey = $os.getenv("MIDTRANS_SERVER_KEY");
-  const baseUrl = $os.getenv("MIDTRANS_BASE_URL");
+  const baseUrl   = $os.getenv("MIDTRANS_BASE_URL");
 
   if (!serverKey || !baseUrl) {
-    return c.json(500, { error: "Konfigurasi Midtrans belum diatur di server" });
+    return e.json(500, { error: "Konfigurasi Midtrans belum diatur di server" });
   }
 
   const credentials = btoa(serverKey + ":");
@@ -52,26 +55,30 @@ routerAdd("POST", "/api/create-snap-token", (c) => {
           quantity: 1,
           name: "UWANGKU Premium",
         }],
+        finish_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/finish",
+        unfinish_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/unfinish",
+        error_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/error",
       }),
       timeout: 30,
     });
   } catch (err) {
-    return c.json(502, { error: "Gagal terhubung ke Midtrans: " + err.toString() });
+    return e.json(502, { error: "Gagal terhubung ke Midtrans: " + err.toString() });
   }
 
   if (res.statusCode >= 200 && res.statusCode < 300) {
-    return c.json(200, res.json());
+    return e.json(200, res.json());
   }
 
   if (res.statusCode === 401) {
-    return c.json(401, { error: "Server key Midtrans tidak valid" });
+    return e.json(401, { error: "Server key Midtrans tidak valid" });
   }
 
   let errorMsg = "Terjadi kesalahan";
   try {
     const resJson = res.json();
     errorMsg = resJson.status_message || JSON.stringify(resJson);
-  } catch (e) {}
-  
-  return c.json(res.statusCode, { error: errorMsg });
-}, $apis.requireAdminOrRecordAuth());
+  } catch (err2) {}
+
+  return e.json(res.statusCode, { error: errorMsg });
+
+}, $apis.requireAuth());

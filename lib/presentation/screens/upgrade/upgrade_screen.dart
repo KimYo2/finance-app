@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../data/models/payment_model.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/usage_provider.dart';
 import '../../../data/datasources/remote/midtrans_service.dart';
 import 'payment_webview_screen.dart';
@@ -556,11 +557,13 @@ class _UpgradeScreenState extends State<UpgradeScreen> {
       final orderId = midtrans.generateOrderId();
       debugPrint('[Payment] Order ID: $orderId');
 
+      final authProv = context.read<AuthProvider>();
+
       final token = await midtrans.createSnapToken(
         orderId: orderId,
         amount: amount.toDouble(),
-        customerName: 'User',
-        customerEmail: 'user@example.com',
+        customerName: authProv.userName,
+        customerEmail: authProv.userEmail,
       );
 
       debugPrint('[Payment] Snap token received: ${token.substring(0, 8)}...');
