@@ -1,4 +1,4 @@
-# UWANGKU v2.0.0
+# UWANGKU v2.0.1
 
 Aplikasi Asisten Keuangan Pribadi Berbasis AI menggunakan Flutter dengan dukungan penuh untuk Android dan iOS.
 
@@ -16,10 +16,12 @@ Aplikasi Asisten Keuangan Pribadi Berbasis AI menggunakan Flutter dengan dukunga
   - Auto-detect koneksi → ML Kit (online) atau Tesseract (offline)
 - **Cross-Platform** - Tampilan native untuk Android (Material) dan iOS (Cupertino)
 - **Splash Screen** - Gradient animasi dengan logo UWANGKU + connection status
+- **Google OAuth** - Login dengan Google, redirect balik ke app via custom scheme `com.example.uangku://oauth`
 - **Dual Storage** - PocketBase sebagai PRIMARY, SQLite sebagai OFFLINE FALLBACK
   - Auto-switch: SmartDbHelper otomatis pilih storage berdasarkan koneksi
   - Write-through cache: data online otomatis disimpan lokal
   - Auto-sync: data offline otomatis dikirim ke server saat koneksi pulih
+- **Auth Persistence** - Login sekali, token tersimpan di device (AsyncAuthStore + SharedPreferences)
 - **Premium** - Unlimited AI, Export PDF/CSV (via Midtrans)
 
 ## Fitur Premium
@@ -35,7 +37,7 @@ Aplikasi Asisten Keuangan Pribadi Berbasis AI menggunakan Flutter dengan dukunga
 ### Upgrade Premium
 
 - **Bulanan**: Rp 49.000/bulan
-- **Tahunan**: Rp 399.000/tahun (hemat 71%)
+- **Tahunan**: Rp 249.000/tahun (hemat 58%)
 
 Bayar via Midtrans Snap (WebView)
 

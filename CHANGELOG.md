@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.1] - 2026-05-11
+
+### Fixed
+
+- **Auth Token Persistence** — Token login tidak hilang setelah app ditutup
+  - Migrasi dari `AuthStore` (in-memory) ke `AsyncAuthStore` + `SharedPreferences`
+  - `PbClient` sekarang punya `init()` yang dipanggil di `main.dart` sebelum `PbHelper`
+  - User cukup login sekali, token bertahan sampai app data dihapus
+
+- **Payment Environment Mismatch** — Gagal bayar karena Snap URL sandbox vs production tidak konsisten
+  - `getSnapUrl()` sekarang pake `AppConfig.isProduction` (dari server), bukan cek URL PocketBase
+  - Midtrans hook: tambah `finish_redirect_url` agar WebView bisa deteksi status pembayaran
+  - Customer name/email sekarang pake data real dari `AuthProvider` (tidak hardcoded)
+
+- **OAuth Redirect Back to App** — Browser tidak balik ke app setelah login Google
+  - Setelah realtime OAuth selesai, `launchUrl` custom scheme `com.example.uangku://oauth/callback` dipanggil
+  - Browser otomatis redirect balik ke aplikasi lewat intent-filter
+
+### Changed
+
+- **Harga Premium Tahunan** — Rp 399.000 → Rp 249.000
+
 ## [2.0.0] - 2026-05-11
 
 ### Changed
