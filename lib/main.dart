@@ -354,9 +354,10 @@ class _AppShellState extends State<AppShell> {
 
   Widget _buildTabFab(int index) {
     switch (index) {
-      case 0:
-        return FloatingActionButton.extended(
-          key: const ValueKey('fab_home'),
+      case 1:
+        return FloatingActionButton(
+          key: const ValueKey('fab_history'),
+          mini: true,
           onPressed: () {
             Navigator.push(
               context,
@@ -365,8 +366,7 @@ class _AppShellState extends State<AppShell> {
               ),
             );
           },
-          icon: const Icon(Icons.add),
-          label: const Text('Tambah Transaksi'),
+          child: const Icon(Icons.add),
         );
       case 2:
         return FloatingActionButton.extended(
