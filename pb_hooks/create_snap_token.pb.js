@@ -51,7 +51,7 @@ routerAdd("POST", "/api/create-snap-token", (e) => {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: JSON.stringify({
+        body: {
           transaction_details: {
             order_id: orderId,
             gross_amount: parseInt(amount),
@@ -69,7 +69,7 @@ routerAdd("POST", "/api/create-snap-token", (e) => {
           finish_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/finish",
           unfinish_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/unfinish",
           error_redirect_url: "https://equator-untainted-stank.ngrok-free.dev/payment/error",
-        }),
+        },
         timeout: 30,
       });
     } catch (err) {
