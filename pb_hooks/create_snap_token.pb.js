@@ -66,7 +66,7 @@ routerAdd("POST", "/api/create-snap-token", (e) => {
   }
 
   if (res.statusCode >= 200 && res.statusCode < 300) {
-    return e.json(200, res.json());
+    return e.json(200, res.json);
   }
 
   if (res.statusCode === 401) {
@@ -75,8 +75,8 @@ routerAdd("POST", "/api/create-snap-token", (e) => {
 
   let errorMsg = "Terjadi kesalahan";
   try {
-    const resJson = res.json();
-    errorMsg = resJson.status_message || JSON.stringify(resJson);
+    const resJson = res.json;
+    errorMsg = (resJson && resJson.status_message) || JSON.stringify(resJson);
   } catch (err2) {}
 
   return e.json(res.statusCode, { error: errorMsg });
