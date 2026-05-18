@@ -9,8 +9,8 @@ import '../../../../data/models/transaction_type.dart';
 class ReportBloc extends Bloc<ReportEvent, ReportState> {
   final ReportDatasource _datasource;
 
-  ReportBloc({required ReportDatasource datasource})
-      : _datasource = datasource,
+  ReportBloc({ReportDatasource? datasource})
+      : _datasource = datasource ?? ReportDatasource(),
         super(const ReportInitial()) {
     on<ReportLoadRequested>(_onLoad);
     on<ReportChangeMonth>(_onChangeMonth);

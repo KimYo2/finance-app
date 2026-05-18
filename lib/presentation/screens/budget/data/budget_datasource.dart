@@ -1,10 +1,13 @@
 import '../../../../data/datasources/smart_db_helper.dart';
+import '../../../../data/datasources/pb_helper.dart';
+import '../../../../data/datasources/local/sqlite_helper.dart';
 import '../../../../data/models/budget_model.dart';
 
 class BudgetDatasource {
   final SmartDbHelper _dbHelper;
 
-  BudgetDatasource(this._dbHelper);
+  BudgetDatasource({SmartDbHelper? dbHelper})
+      : _dbHelper = dbHelper ?? SmartDbHelper(remote: PbHelper(), local: SqliteHelper());
 
   Future<List<BudgetModel>> fetchAll() => _dbHelper.fetchAllBudgets();
 

@@ -13,7 +13,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
   TransactionBloc() : super(const TransactionInitial()) {
     _dbHelper = SmartDbHelper(remote: PbHelper(), local: SqliteHelper());
-    _datasource = TransactionDatasource(_dbHelper);
+    _datasource = TransactionDatasource(dbHelper: _dbHelper);
     on<TransactionLoadRequested>(_onLoadTransactions);
     on<TransactionAddRequested>(_onAddTransaction);
     on<TransactionUpdateRequested>(_onUpdateTransaction);

@@ -10,6 +10,7 @@ import '../../../../services/pb_client.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc() : super(const AuthInitial()) {
     on<AuthCheckStatus>(_onCheckAuthStatus);
+    on<AuthLoginRequested>(_onLoginRequested);
     on<AuthGoogleLoginRequested>(_onGoogleLoginRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
   }
@@ -30,6 +31,45 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       debugPrint('[AuthBloc] check error: $e');
       emit(const AuthUnauthenticated());
+    }
+  }
+
+  Future<void> _onLoginRequested(
+    AuthLoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+    try {
+      await PbClient.instance.collection('users').authWithPassword(
+        event.email,
+        event.password,
+      );
+
+      final isValid = PbClient.instance.authStore.isValid;
+      if (isValid) {
+        final user = PbClient.instance.authStore.model as RecordModel;
+        emit(AuthAuthenticated(user: user));
+      } else {
+        emit(const AuthError(message: 'Login gagal. Silakan coba lagi'));
+      }
+    } catch (e) {
+      debugPrint('[AuthBloc] login error: $e');
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('invalid') ||
+          msg.contains('credentials') ||
+          msg.contains('password')) {
+        emit(const AuthError(message: 'Email atau password salah'));
+      } else if (msg.contains('network') ||
+          msg.contains('connection') ||
+          msg.contains('socket')) {
+        emit(const AuthError(
+          message: 'Tidak dapat terhubung ke server. Periksa koneksi internet kamu',
+        ));
+      } else if (msg.contains('timeout')) {
+        emit(const AuthError(message: 'Koneksi timeout. Coba lagi'));
+      } else {
+        emit(const AuthError(message: 'Login gagal. Silakan coba lagi'));
+      }
     }
   }
 

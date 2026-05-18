@@ -13,7 +13,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
   BudgetBloc() : super(const BudgetInitial()) {
     _dbHelper = SmartDbHelper(remote: PbHelper(), local: SqliteHelper());
-    _datasource = BudgetDatasource(_dbHelper);
+    _datasource = BudgetDatasource(dbHelper: _dbHelper);
     on<BudgetLoadRequested>(_onLoadBudgets);
     on<BudgetAddRequested>(_onAddBudget);
     on<BudgetUpdateRequested>(_onUpdateBudget);

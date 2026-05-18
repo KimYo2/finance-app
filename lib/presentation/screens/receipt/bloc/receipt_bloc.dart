@@ -9,8 +9,8 @@ import '../../../../data/models/transaction_type.dart';
 class ReceiptBloc extends Bloc<ReceiptEvent, ReceiptState> {
   final ReceiptDatasource _datasource;
 
-  ReceiptBloc({required ReceiptDatasource datasource})
-      : _datasource = datasource,
+  ReceiptBloc({ReceiptDatasource? datasource})
+      : _datasource = datasource ?? ReceiptDatasource(),
         super(const ReceiptInitial()) {
     on<ReceiptSaveRequested>(_onSave);
   }

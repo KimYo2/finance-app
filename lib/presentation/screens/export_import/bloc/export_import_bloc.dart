@@ -7,8 +7,8 @@ import '../data/export_datasource.dart';
 class ExportImportBloc extends Bloc<ExportImportEvent, ExportImportState> {
   final ExportDatasource _datasource;
 
-  ExportImportBloc({required ExportDatasource datasource})
-      : _datasource = datasource,
+  ExportImportBloc({ExportDatasource? datasource})
+      : _datasource = datasource ?? ExportDatasource(),
         super(const ExportImportInitial()) {
     on<ExportImportLoadRequested>(_onLoad);
     on<ExportImportExportPdf>(_onExportPdf);

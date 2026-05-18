@@ -35,6 +35,12 @@ All notable changes to this project will be documented in this file.
   - `AiChatBloc` diprovide via `BlocProvider` di `app_shell.dart`
   - `TransactionBloc` & `BudgetBloc` — Kini menggunakan local datasource (TransactionDatasource, BudgetDatasource) bukan SmartDbHelper langsung
 
+### Fixed
+
+- **AuthLoginRequested Handler** — Tambah handler `_onLoginRequested` di AuthBloc untuk login email/password via `authWithPassword`, termasuk error categorization (invalid credentials, network, timeout)
+- **Login Screen Email/Password** — login_screen.dart sekarang punya form email + password di samping Google login, dispatch `AuthLoginRequested` event
+- **BLoC Constructor Pattern** — ExportImportBloc, ReceiptBloc, ReportBloc, TransactionBloc, BudgetBloc pakai optional datasource injection `{DatasourceType? datasource}` untuk fleksibilitas testing
+
 ### Version Scheme
 
 - **Naming Scheme** — Semua versi sekarang pakai prefix `InDev`
