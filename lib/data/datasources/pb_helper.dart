@@ -45,7 +45,7 @@ class PbHelper {
       );
       return result.items.map((r) => TransactionModel.fromRecord(r)).toList();
     } catch (e) {
-      throw Exception('Gagal mengambil data: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -56,7 +56,7 @@ class PbHelper {
       final result = await _pb.collection('transactions').create(body: body);
       return TransactionModel.fromRecord(result);
     } catch (e) {
-      throw Exception('Gagal membuat transaksi: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -64,7 +64,7 @@ class PbHelper {
     try {
       await _pb.collection('transactions').delete(id);
     } catch (e) {
-      throw Exception('Gagal menghapus transaksi: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -75,7 +75,7 @@ class PbHelper {
       final result = await _pb.collection('transactions').update(id, body: body);
       return TransactionModel.fromRecord(result);
     } catch (e) {
-      throw Exception('Gagal mengupdate transaksi: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -94,7 +94,7 @@ class PbHelper {
       );
       return result.items.map((r) => TransactionModel.fromRecord(r)).toList();
     } catch (e) {
-      throw Exception('Gagal mengambil data bulan: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -108,7 +108,7 @@ class PbHelper {
       );
       return result.items.map((r) => AssetModel.fromRecord(r)).toList();
     } catch (e) {
-      throw Exception('Gagal mengambil data aset: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -119,7 +119,7 @@ class PbHelper {
       final result = await _pb.collection('assets').create(body: body);
       return AssetModel.fromRecord(result);
     } catch (e) {
-      throw Exception('Gagal membuat aset: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -127,7 +127,7 @@ class PbHelper {
     try {
       await _pb.collection('assets').delete(id);
     } catch (e) {
-      throw Exception('Gagal menghapus aset: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -138,7 +138,7 @@ class PbHelper {
       final result = await _pb.collection('assets').update(id, body: body);
       return AssetModel.fromRecord(result);
     } catch (e) {
-      throw Exception('Gagal mengupdate aset: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -152,7 +152,7 @@ class PbHelper {
       );
       return result.items.map((r) => DebtModel.fromRecord(r)).toList();
     } catch (e) {
-      throw Exception('Gagal mengambil data hutang/piutang: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -163,7 +163,7 @@ class PbHelper {
       final result = await _pb.collection('debts').create(body: body);
       return DebtModel.fromRecord(result);
     } catch (e) {
-      throw Exception('Gagal membuat hutang/piutang: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -171,7 +171,7 @@ class PbHelper {
     try {
       await _pb.collection('debts').delete(id);
     } catch (e) {
-      throw Exception('Gagal menghapus hutang/piutang: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -182,7 +182,7 @@ class PbHelper {
       final result = await _pb.collection('debts').update(id, body: body);
       return DebtModel.fromRecord(result);
     } catch (e) {
-      throw Exception('Gagal mengupdate hutang/piutang: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -196,7 +196,7 @@ class PbHelper {
       );
       return result.items.map((r) => DebtModel.fromRecord(r)).toList();
     } catch (e) {
-      throw Exception('Gagal mengambil data hutang/piutang: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -210,7 +210,7 @@ class PbHelper {
       );
       return result.items.map((r) => BudgetModel.fromRecord(r)).toList();
     } catch (e) {
-      throw Exception('Gagal mengambil data budget: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -221,7 +221,7 @@ class PbHelper {
       final result = await _pb.collection('budgets').create(body: body);
       return BudgetModel.fromRecord(result);
     } catch (e) {
-      throw Exception('Gagal membuat budget: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -229,7 +229,7 @@ class PbHelper {
     try {
       await _pb.collection('budgets').delete(id);
     } catch (e) {
-      throw Exception('Gagal menghapus budget: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -240,7 +240,7 @@ class PbHelper {
       final result = await _pb.collection('budgets').update(id, body: body);
       return BudgetModel.fromRecord(result);
     } catch (e) {
-      throw Exception('Gagal mengupdate budget: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -254,7 +254,7 @@ class PbHelper {
       );
       return result.items.map((r) => BudgetModel.fromRecord(r)).toList();
     } catch (e) {
-      throw Exception('Gagal mengambil data budget: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -262,7 +262,7 @@ class PbHelper {
     try {
       await _pb.collection('budgets').update(id, body: {'spent': spent});
     } catch (e) {
-      throw Exception('Gagal update spent budget: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -276,7 +276,7 @@ class PbHelper {
       );
       return result.items.map((r) => CategoryModel.fromRecord(r)).toList();
     } catch (e) {
-      throw Exception('Gagal mengambil kategori: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -287,7 +287,7 @@ class PbHelper {
       final result = await _pb.collection('categories').create(body: body);
       return CategoryModel.fromRecord(result);
     } catch (e) {
-      throw Exception('Gagal membuat kategori: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -295,7 +295,7 @@ class PbHelper {
     try {
       await _pb.collection('categories').delete(id);
     } catch (e) {
-      throw Exception('Gagal menghapus kategori: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -306,7 +306,7 @@ class PbHelper {
       final result = await _pb.collection('categories').update(id, body: body);
       return CategoryModel.fromRecord(result);
     } catch (e) {
-      throw Exception('Gagal mengupdate kategori: ${e.toString()}');
+      rethrow;
     }
   }
 }

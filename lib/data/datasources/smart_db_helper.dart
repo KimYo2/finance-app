@@ -81,6 +81,7 @@ class SmartDbHelper implements DbInterface {
     Future<void> Function()? queueOp,
     Future<void> Function(T)? writeThrough,
   }) async {
+    if (!_initialized) await initialize();
     if (_isRemoteAvailable) {
       try {
         final result = await remoteOp();

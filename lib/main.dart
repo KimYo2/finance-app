@@ -4,6 +4,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'app/app.dart';
 import 'core/error/error_boundary.dart';
 import 'data/datasources/pb_helper.dart';
+import 'data/datasources/local/sqlite_helper.dart';
+import 'data/datasources/smart_db_helper.dart';
 import 'services/pb_client.dart';
 import 'services/oauth_handler.dart';
 
@@ -12,6 +14,7 @@ void main() async {
   await initializeDateFormatting('id_ID', null);
   await PbClient.init();
   await PbHelper().initialize();
+  await SmartDbHelper(remote: PbHelper(), local: SqliteHelper()).initialize();
 
   _initOAuthListener();
 

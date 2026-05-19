@@ -26,7 +26,6 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
   Future<void> ensureInitialized() async {
     if (_initialized) return;
     _initialized = true;
-    await _dbHelper.initialize();
   }
 
   Future<void> _onLoadBudgets(

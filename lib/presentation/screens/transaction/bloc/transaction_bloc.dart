@@ -27,7 +27,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   Future<void> ensureInitialized() async {
     if (_initialized) return;
     _initialized = true;
-    await _dbHelper.initialize();
     add(const TransactionLoadRequested());
     _dbHelper.connectivityStream.listen((_) {
       if (state is TransactionLoaded) {
