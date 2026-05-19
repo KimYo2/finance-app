@@ -19,6 +19,8 @@ import '../budget/budget_screen.dart';
 import '../transaction/history_screen.dart';
 import '../upgrade/upgrade_screen.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../blocs/settings/settings_bloc.dart';
+import '../settings/settings_screen.dart';
 import '../../widgets/budget/budget_progress_card.dart';
 import '../../widgets/transaction/transaction_card.dart';
 
@@ -532,6 +534,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   );
                 },
               ),
+              IconButton(
+                icon: const Icon(Icons.settings_outlined, size: 22),
+                tooltip: 'Pengaturan',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const _SettingsWrapper(),
+                    ),
+                  );
+                },
+              ),
               Consumer<ThemeProvider>(
                 builder: (context, themeProvider, _) => IconButton(
                   icon: Icon(
@@ -903,6 +917,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SettingsWrapper extends StatelessWidget {
+  const _SettingsWrapper();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: context.read<SettingsBloc>(),
+      child: const SettingsScreen(),
     );
   }
 }

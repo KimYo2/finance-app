@@ -30,6 +30,14 @@ class SqliteHelper implements DbInterface {
     return openDatabase(dbPath, version: 1, onCreate: _createTables);
   }
 
+  Future<void> dropAllData() async {
+    final db = await database;
+    await db.delete('transactions');
+    await db.delete('assets');
+    await db.delete('debts');
+    await db.delete('budgets');
+  }
+
   Future<void> _createTables(Database db, int version) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS transactions (

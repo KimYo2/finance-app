@@ -42,15 +42,11 @@ class SyncQueueHelper {
         retry_count INTEGER DEFAULT 0
       )
     ''');
-
-    await db.execute('''
-      CREATE INDEX IF NOT EXISTS idx_sync_queue_synced ON sync_queue(synced)
-    ''');
   }
 
-  Future<int> enqueue(String operation, String collection, Map<String, dynamic> payload) async {
+  Future<void> enqueue(String operation, String collection, Map<String, dynamic> payload) async {
     final db = await database;
-    return await db.insert('sync_queue', {
+    await db.insert('sync_queue', {
       'operation': operation,
       'collection': collection,
       'payload': jsonEncode(payload),
@@ -64,8 +60,7 @@ class SyncQueueHelper {
     final db = await database;
     return await db.query(
       'sync_queue',
-      where: 'synced = ? AND retry_count < ?',
-      whereArgs: [0, 3],
+      where: 'synced = 0 AND retry_count < 5',
       orderBy: 'created_at ASC',
     );
   }
@@ -100,7 +95,9 @@ class SyncQueueHelper {
 
   Future<int> getPendingCount() async {
     final db = await database;
-    final result = await db.rawQuery('SELECT COUNT(*) as count FROM sync_queue WHERE synced = 0');
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM sync_queue WHERE synced = 0',
+    );
     return Sqflite.firstIntValue(result) ?? 0;
   }
 }

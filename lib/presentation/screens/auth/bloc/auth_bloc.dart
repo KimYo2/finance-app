@@ -1,19 +1,32 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pocketbase/pocketbase.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../../../domain/entities/user_profile.dart';
+import '../../../../domain/repositories/auth_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
-import '../../../../services/local_oauth_server.dart';
-import '../../../../services/pb_client.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc() : super(const AuthInitial()) {
+  final AuthRepository _authRepository;
+
+  AuthBloc({required AuthRepository authRepository})
+      : _authRepository = authRepository,
+        super(const AuthInitial()) {
     on<AuthCheckStatus>(_onCheckAuthStatus);
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthGoogleLoginRequested>(_onGoogleLoginRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
+    on<AuthDeleteAccountRequested>(_onDeleteAccountRequested);
+    on<AuthUpdateProfileRequested>(_onUpdateProfileRequested);
+    on<AuthChangePasswordRequested>(_onChangePasswordRequested);
+  }
+
+  Future<UserProfile?> _refreshProfile() async {
+    try {
+      return await _authRepository.getCurrentUser();
+    } catch (e) {
+      debugPrint('[AuthBloc] refresh profile error: $e');
+      return null;
+    }
   }
 
   Future<void> _onCheckAuthStatus(
@@ -22,10 +35,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
     try {
-      final isValid = PbClient.instance.authStore.isValid;
-      if (isValid) {
-        final user = PbClient.instance.authStore.record as RecordModel;
-        emit(AuthAuthenticated(user: user));
+      final profile = await _refreshProfile();
+      if (profile != null) {
+        emit(AuthAuthenticated(profile: profile));
       } else {
         emit(const AuthUnauthenticated());
       }
@@ -35,24 +47,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  Future<void> _emitAuthenticated(Emitter<AuthState> emit) async {
+    final profile = await _refreshProfile();
+    if (profile != null) {
+      emit(AuthAuthenticated(profile: profile));
+    } else {
+      emit(const AuthError(message: 'Gagal memuat profil'));
+    }
+  }
+
   Future<void> _onLoginRequested(
     AuthLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(const AuthLoading());
     try {
-      await PbClient.instance.collection('users').authWithPassword(
-        event.email,
-        event.password,
-      );
-
-      final isValid = PbClient.instance.authStore.isValid;
-      if (isValid) {
-        final user = PbClient.instance.authStore.record as RecordModel;
-        emit(AuthAuthenticated(user: user));
-      } else {
-        emit(const AuthError(message: 'Login gagal. Silakan coba lagi'));
-      }
+      await _authRepository.signInWithEmail(event.email, event.password);
+      await _emitAuthenticated(emit);
     } catch (e) {
       debugPrint('[AuthBloc] login error: $e');
       final msg = e.toString().toLowerCase();
@@ -80,62 +91,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
     try {
-      final authMethods = await PbClient.instance
-          .collection('users')
-          .listAuthMethods();
-
-      final provider = authMethods.oauth2.providers
-          .firstWhere((p) => p.name == 'google');
-
-      const loopbackRedirect = 'http://127.0.0.1:8765/';
-
-      // Replace PocketBase redirect_uri with loopback address
-      final uri = Uri.parse(provider.authURL);
-      final params = Map<String, String>.from(uri.queryParameters);
-      params['redirect_uri'] = loopbackRedirect;
-      final url = uri.replace(queryParameters: params);
-
-      // Start local server BEFORE opening browser
-      final resultFuture = LocalOAuthServer.start();
-
-      // Buka di external browser
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-
-      // Tunggu redirect ke local server
-      final result = await resultFuture;
-      final code = result['code'];
-
-      if (code == null || code.isEmpty) {
-        emit(const AuthError(message: 'Login gagal: kode tidak ditemukan'));
-        return;
-      }
-
-      // Tukar code untuk token via PocketBase
-      await PbClient.instance.collection('users').authWithOAuth2Code(
-        'google',
-        code,
-        provider.codeVerifier,
-        loopbackRedirect,
-      );
-
-      final isValid = PbClient.instance.authStore.isValid;
-      if (isValid) {
-        final user = PbClient.instance.authStore.record as RecordModel;
-        emit(AuthAuthenticated(user: user));
-      } else {
-        emit(const AuthUnauthenticated());
-      }
+      await _authRepository.signInWithGoogle();
+      await _emitAuthenticated(emit);
     } catch (e) {
       debugPrint('[AuthBloc] google login error: $e');
       final msg = e.toString().toLowerCase();
-      if (msg.contains('network') ||
+      if (msg.contains('cancel')) {
+        emit(const AuthUnauthenticated());
+      } else if (msg.contains('network') ||
           msg.contains('connection') ||
           msg.contains('socket')) {
         emit(const AuthError(
           message: 'Tidak dapat terhubung ke server. Periksa koneksi internet kamu',
         ));
-      } else if (msg.contains('timeout')) {
-        emit(const AuthError(message: 'Koneksi timeout. Coba lagi'));
       } else {
         emit(const AuthError(message: 'Login gagal. Silakan coba lagi'));
       }
@@ -148,13 +116,61 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
     try {
-      PbClient.instance.authStore.clear();
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('pb_auth');
+      await _authRepository.signOut();
       emit(const AuthUnauthenticated());
     } catch (e) {
       debugPrint('[AuthBloc] logout error: $e');
       emit(const AuthUnauthenticated());
+    }
+  }
+
+  Future<void> _onDeleteAccountRequested(
+    AuthDeleteAccountRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+    try {
+      await _authRepository.deleteAccount();
+      emit(const AuthUnauthenticated());
+    } catch (e) {
+      debugPrint('[AuthBloc] delete account error: $e');
+      emit(AuthError(message: 'Gagal menghapus akun: $e'));
+    }
+  }
+
+  Future<void> _onUpdateProfileRequested(
+    AuthUpdateProfileRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      await _authRepository.updateProfile(event.name);
+      emit(const AuthActionSuccess(message: 'Profil berhasil diperbarui'));
+      await _emitAuthenticated(emit);
+    } catch (e) {
+      debugPrint('[AuthBloc] update profile error: $e');
+      emit(const AuthError(message: 'Gagal memperbarui profil'));
+    }
+  }
+
+  Future<void> _onChangePasswordRequested(
+    AuthChangePasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+    try {
+      await _authRepository.changePassword(
+        event.currentPassword,
+        event.newPassword,
+      );
+      emit(const AuthActionSuccess(message: 'Password berhasil diubah'));
+    } catch (e) {
+      debugPrint('[AuthBloc] change password error: $e');
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('old') || msg.contains('current')) {
+        emit(const AuthError(message: 'Password saat ini salah'));
+      } else {
+        emit(const AuthError(message: 'Gagal mengubah password'));
+      }
     }
   }
 }

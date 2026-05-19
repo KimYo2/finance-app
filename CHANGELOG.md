@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## InDev [2.4.0] - 2026-05-19
+
+### Added
+
+- **Error Boundary** — Global error handler di root app
+  - `ErrorBoundary` StatefulWidget bungkus `FinanceApp`
+  - Tangkap `FlutterError.onError` + `PlatformDispatcher.instance.onError`
+  - Custom fallback UI dengan pesan user-friendly + tombol "Coba Lagi"
+  - Detail error di mode debug (tap "Detail Error")
+
+- **Halaman Pengaturan (Settings)** — Container untuk semua konfigurasi aplikasi
+  - Menu: Akun, Tampilan (Dark Mode), Mata Uang, Notifikasi, Data (Ekspor/Impor), Premium, Tentang
+  - Icon gear di AppBar dashboard → navigasi ke SettingsScreen
+  - `SettingsBloc` (BlocProvider) + `SettingsRepositoryImpl` (SharedPreferences)
+
+- **Account Deletion** — Hapus akun dan seluruh data (wajib Google Play)
+  - Double confirmation: dialog #1 peringatan + dialog #2 ketik "HAPUS"
+  - Hapus semua data dari PocketBase (transactions, assets, debts, budgets)
+  - Hapus user dari PocketBase
+  - Clear SQLite lokal + Sync Queue + SharedPreferences
+  - Flow: `AuthBloc` → `DeleteAccount` use case → `AuthRepositoryImpl.deleteAccount()`
+  - `dropAllData()` di SqliteHelper, `clearAll()` di SyncQueueHelper
+
+- **Profil User & Ganti Password**
+  - ProfileScreen: nama (edit), email (readonly), avatar inisial
+  - Form ganti password dengan validasi konfirmasi
+  - Update profil via PocketBase `users.update(id, body: {'name': name})`
+  - Ganti password via PocketBase `users.update(id, body: {'oldPassword', 'password', 'passwordConfirm'})`
+
+- **Clean Architecture BLoC Refactor (Auth)**
+  - `AuthBloc` sekarang inject `AuthRepository` (dependency injection)
+  - `AuthState` menggunakan `UserProfile` entity (tanpa RecordModel dari PocketBase)
+  - Event baru: `AuthDeleteAccountRequested`, `AuthUpdateProfileRequested`, `AuthChangePasswordRequested`
+  - State baru: `AuthActionSuccess` untuk feedback non-navigasi
+  - Use cases: `SignInWithEmail`, `DeleteAccount`, `ChangePassword`, `UpdateProfile`, `GetCurrentUser`
+
+### Changed
+
+- **app.dart** — Migrasi dari single `BlocProvider` ke `MultiBlocProvider`
+  - `AuthBloc` dengan `AuthRepositoryImpl` injection
+  - `SettingsBloc` dengan `SettingsRepositoryImpl` injection
+- **main.dart** — Bungkus `FinanceApp` dengan `ErrorBoundary`
+- **AuthRepository domain** — Tambah method: `signInWithEmail`, `getCurrentUser`, `updateProfile`, `changePassword`, `deleteAccount`, `userId`
+
 ## InDev [2.3.1] - 2026-05-19
 
 ### Changed

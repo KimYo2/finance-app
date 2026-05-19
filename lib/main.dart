@@ -2,6 +2,7 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'app/app.dart';
+import 'core/error/error_boundary.dart';
 import 'data/datasources/pb_helper.dart';
 import 'services/pb_client.dart';
 import 'services/oauth_handler.dart';
@@ -14,7 +15,11 @@ void main() async {
 
   _initOAuthListener();
 
-  runApp(const FinanceApp());
+  runApp(
+    ErrorBoundary(
+      child: const FinanceApp(),
+    ),
+  );
 }
 
 void _initOAuthListener() {

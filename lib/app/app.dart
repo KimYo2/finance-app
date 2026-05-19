@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import '../data/repositories/auth_repository_impl.dart';
+import '../data/repositories/settings_repository_impl.dart';
 import '../presentation/providers/transaction_provider.dart';
 import '../presentation/providers/theme_provider.dart';
 import '../presentation/providers/usage_provider.dart';
 import '../presentation/providers/budget_provider.dart';
+import '../presentation/blocs/settings/settings_bloc.dart';
 import '../presentation/screens/auth/bloc/auth_bloc.dart';
 import '../presentation/screens/auth/bloc/auth_state.dart';
 import '../presentation/screens/auth/splash_screen.dart';
@@ -51,8 +54,19 @@ class FinanceApp extends StatelessWidget {
           },
         ),
       ],
-      child: BlocProvider(
-        create: (_) => AuthBloc(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthBloc>(
+            create: (_) => AuthBloc(
+              authRepository: AuthRepositoryImpl(),
+            ),
+          ),
+          BlocProvider<SettingsBloc>(
+            create: (_) => SettingsBloc(
+              settingsRepository: SettingsRepositoryImpl(),
+            ),
+          ),
+        ],
         child: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthUnauthenticated) {

@@ -1,5 +1,10 @@
 export 'auth/sign_in_with_google.dart';
+export 'auth/sign_in_with_email.dart';
 export 'auth/sign_out.dart';
+export 'auth/delete_account.dart';
+export 'auth/change_password.dart';
+export 'auth/update_profile.dart';
+export 'auth/get_current_user.dart';
 export 'transaction/get_transactions.dart';
 export 'transaction/add_transaction.dart';
 export 'transaction/delete_transaction.dart';
