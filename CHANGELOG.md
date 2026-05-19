@@ -2,22 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.7.0] - 2026-05-19
-
-### Added
-
-- **AI Multi-Currency Detection** — AI chat sekarang deteksi mata uang asing dari input user
-  - System prompt: instruksi untuk tidak konversi ke IDR, simpan nominal asli + field `currency`
-  - Contoh: "500 dolar" → currency USD amount 500, "100 SGD" → currency SGD amount 100
-  - `_parseResponse` baca `currency` dari JSON, set `exchangeRateToIdr` dari `ExchangeRateService`
-  - Pending transaction card tampilkan amount asli + nilai IDR jika bukan IDR
-
-### Changed
-
-- `lib/data/datasources/remote/ai_service.dart` — system prompt + currency-aware parsing
-- `lib/presentation/screens/ai_chat/ai_chat_screen.dart` — tampilkan currency symbol + IDR equivalent
-
-## [2.6.0] - 2026-05-19
+## [2.4.1] - 2026-05-19
 
 ### Added
 
@@ -26,88 +11,56 @@ All notable changes to this project will be documented in this file.
   - Inisialisasi di SplashScreen, fallback ke hardcoded rates jika offline
   - `CurrencyHelper.convert()` & `format()` otomatis pakai live rate
 
-- **Hybrid Categories** — Seed 22 kategori default + user tetap bisa kustom
-  - `DefaultCategories` — 16 expense + 6 income kategori umum (Makanan, Transport, Gaji, dll)
-  - `CategoryBloc` auto-seed saat `CategoryLoadRequested` pertama (flag `categories_seeded_v1` di SharedPreferences)
-  - Kategori lama (sebelum update) tidak terpengaruh
+- **AI Multi-Currency Detection** — AI chat deteksi mata uang asing dari input user
+  - System prompt: instruksi simpan nominal asli + field `currency`, jangan konversi ke IDR
+  - `_parseResponse` baca `currency` dari JSON, set `exchangeRateToIdr` dari `ExchangeRateService`
+  - Pending transaction card tampilkan amount asli + nilai IDR jika bukan IDR
 
-- **Visual Icon Picker** — Pilih ikon kategori via grid, bukan teks manual
-  - `CategoryIconRegistry` — 70+ Material Icons mapping string → `IconData`
-  - Bottom sheet `DraggableScrollableSheet` dengan grid 6 kolom
-  - Preview ikon di dialog add/edit kategori
+- **Provider → BLoC Migration (complete)** — Semua state managers migrated dari Provider ke `flutter_bloc`
+  - `app.dart` kini pakai `MultiBlocProvider` dengan 6 BLoCs — zero Provider imports
+  - `TransactionBloc` (enhanced), `BudgetBloc` (enhanced), `UsageBloc` (new), `CategoryBloc` (new)
+  - Computed properties pada `TransactionLoaded`: `totalBalance`, `monthlyIncome`, `monthlyExpense`, `getCategoryTotals`, `getRecentTransactions`
+  - Computed helpers pada `BudgetLoaded`: `getBudgetForCategory`, `getBudgetUsagePercent`, `isOverBudget`, `isWarningBudget`, `getBudgetSummary`
+  - `SyncService` inject `TransactionBloc`, `TransactionMarkSynced` event
+  - Removed `TransactionProvider`, `BudgetProvider`, `UsageProvider`, `ThemeProvider`, `AuthProvider`
+
+- **Multi-Currency Support** — Setiap transaksi/aset/utang/budget dalam mata uang berbeda
+  - Domain entities + SQLite schema v3: kolom `currency` + `exchange_rate_to_idr`
+  - `AppCurrencies`: 10 mata uang (IDR, USD, EUR, SGD, MYR, JPY, GBP, AUD, SAR, CNY)
+  - `CurrencyHelper.format/convert` — locale-aware + konversi
+  - Currency selector di `AddTransactionScreen`
+
+- **Hybrid Categories** — Seed 22 kategori default + user tetap bisa kustom
+  - `DefaultCategories`: 16 expense + 6 income (Makanan, Transport, Gaji, dll)
+  - `CategoryBloc` auto-seed first load via flag `categories_seeded_v1` di SharedPreferences
+
+- **Visual Icon Picker** — 70+ Material Icons dalam grid 6 kolom untuk kategori
+  - `CategoryIconRegistry` mapping string → `IconData`
+  - Bottom sheet `DraggableScrollableSheet` — preview ikon langsung di dialog
+
+- **AI Chat Custom Categories** — System prompt dinamis dari database
+  - `_buildSystemPrompt(expenseCats, incomeCats)` fetch kategori user
+
+### Fixed
+
+- **RenderFlex overflow** — export_screen, settings currency picker, add_transaction picker
+  - `export_screen.dart`: Column → `SingleChildScrollView`
+  - `settings_screen.dart`: currency picker → `Flexible > ListView`
+  - `add_transaction_screen.dart`: currency picker → `Flexible > ListView`
 
 ### Changed
 
-- `lib/presentation/screens/categories/category_screen.dart` — `TextField` ikon diganti `InkWell` + icon picker bottom sheet
+- `lib/data/datasources/remote/ai_service.dart` — system prompt currency-aware + `_parseResponse` currency
 - `lib/presentation/blocs/category/category_bloc.dart` — auto-seed default categories
+- `lib/presentation/screens/ai_chat/ai_chat_screen.dart` — tampilkan currency symbol + IDR equivalent
+- `lib/presentation/screens/categories/category_screen.dart` — icon picker + icon registry
+- `lib/core/utils/currency_helper.dart` — live rates via `ExchangeRateService`
 
-### Added Files
+### New Files
 
 - `lib/core/services/exchange_rate_service.dart`
 - `lib/core/constants/icon_registry.dart`
 - `lib/core/constants/default_categories.dart`
-
-## [2.5.0] - 2026-05-19
-
-### Added
-
-- **Provider → BLoC Migration (complete)** — All 6 state managers migrated to `flutter_bloc`
-  - `AuthBloc` (existing), `SettingsBloc` (existing), `TransactionBloc` (enhanced), `BudgetBloc` (enhanced), `UsageBloc` (new), `CategoryBloc` (new)
-  - All consumer screens updated to use `context.read<>()`/`context.watch<>()`/`BlocBuilder`
-  - Computed properties on `TransactionLoaded`: `totalBalance`, `monthlyIncome`, `monthlyExpense`, `getCategoryTotals`, `getRecentTransactions`
-  - Computed helpers on `BudgetLoaded`: `getBudgetForCategory`, `getBudgetsForMonth`, `getBudgetUsagePercent`, `isOverBudget`, `isWarningBudget`, `getBudgetSummary`
-  - `SyncService` now injects `TransactionBloc` instead of `TransactionProvider`
-  - `TransactionMarkSynced` event for sync queue processing
-  - `app.dart` uses `MultiBlocProvider` with 6 BLoCs — zero `Provider`/`MultiProvider` imports
-  - Removed `TransactionProvider`, `BudgetProvider`, `UsageProvider`, `ThemeProvider`, `AuthProvider` source files
-
-- **Multi-Currency Support** — Setiap transaksi/aset/utang/budget bisa dalam mata uang berbeda
-  - Domain entities: `currency` (default `'IDR'`) + `exchangeRateToIdr` (default `1.0`)
-  - Field di Transaction, Budget (domain + model), Asset, Debt entity baru
-  - `Asset` dan `Debt` domain entities resmi dibuat
-  - SQLite schema v3: kolom `currency` + `exchange_rate_to_idr` di transactions, debts, budgets
-  - Migration v1→v2→v3 via `ALTER TABLE` di `_upgradeTables`
-  - `AppCurrencies`: 10 mata uang (IDR, USD, EUR, SGD, MYR, JPY, GBP, AUD, SAR, CNY) + default rates
-  - `CurrencyHelper.format/convert` — format locale-aware + konversi antar mata uang
-  - Currency selector di `AddTransactionScreen` (bottom sheet Android / CupertinoPicker iOS)
-  - Dynamic currency symbol di field nominal (tidak hardcoded `Rp`)
-
-- **Category Management** — CRUD kategori kustom
-  - `Category` domain entity + `CategoryModel` data model
-  - `CategoryRepository` + `CategoryRepositoryImpl`
-  - SQLite: tabel `categories` + CRUD di SqliteHelper
-  - PocketBase: CRUD via `categories` collection di PbHelper
-  - SmartDbHelper: write-through cache + sync queue + routing
-  - `CategoryBloc` (event/state/bloc) teregister di `MultiBlocProvider`
-  - `CategoryScreen` — add/edit/delete kategori dengan ikon Material, grouped by type
-  - Menu "Kelola Kategori" di SettingsScreen
-
-- **AI Chat Custom Categories** — System prompt dinamis
-  - `_buildSystemPrompt(expenseCats, incomeCats)` — kategorinya diambil dari database
-  - `sendMessage()` fetch kategori user sebelum build prompt
-  - AI sekarang tahu kategori kustom user, bukan cuma default
-
-### Changed
-
-- **AddTransactionScreen** — Load kategori dari `CategoryBloc` bukan hardcoded list
-  - `initState()` dispatch `CategoryLoadRequested`
-  - Toggle tipe transaksi sync kategori via `_syncCategoriesFromBloc()`
-- **SqliteHelper** — db version 3 dengan migrasi kumulatif
-- **SmartDbHelper** — imports diperbaiki (PbClient + ConflictAlgorithm)
-- **MockDbHelper** — ditambah category CRUD methods
-
-### New Files
-
-- `lib/core/constants/currencies.dart` — AppCurrencies constants
-- `lib/core/utils/currency_helper.dart` — CurrencyHelper format/convert
-- `lib/domain/entities/asset.dart` — Asset entity
-- `lib/domain/entities/debt.dart` — Debt entity
-- `lib/domain/entities/category.dart` — Category entity
-- `lib/domain/repositories/category_repository.dart` — abstract repo
-- `lib/data/models/category_model.dart` — data model
-- `lib/data/repositories/category_repository_impl.dart` — impl
-- `lib/presentation/blocs/category/` — CategoryBloc (event/state/bloc)
-- `lib/presentation/screens/categories/category_screen.dart` — management screen
 
 ## InDev [2.4.0] - 2026-05-19
 
