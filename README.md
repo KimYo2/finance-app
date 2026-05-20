@@ -1,4 +1,4 @@
-# UWANGKU InDev v2.3.0
+# UWANGKU — Asisten Keuangan Pribadi v1.7.0
 
 Aplikasi Asisten Keuangan Pribadi Berbasis AI menggunakan Flutter dengan dukungan penuh untuk Android dan iOS.
 
@@ -45,61 +45,96 @@ Bayar via Midtrans Snap (WebView)
 
 - Flutter SDK ^3.11.4
 - Clean Architecture (domain/data/presentation layers)
-- Provider + BLoC (state management)
-- SQLite + PocketBase (dual storage with SmartDbHelper auto-switch)
+- Provider (state management) + BLoC (selected features)
+- PocketBase (primary storage) + SQLite (offline fallback)
 - fl_chart (charts)
 - intl (formatting mata uang Indonesia)
-- Groq API (Llama 3.1 8B)
-- Google ML Kit Text Recognition (OCR)
+- Groq API / Llama 3.1 8B (AI)
+- Google ML Kit + Tesseract (OCR)
 - Flutter Speech to Text
 - Midtrans Snap (payment)
-- Flutter WebView
+- Google OAuth (authentication)
 
-## Struktur Proyek (Clean Architecture)
+## Struktur Proyek
 
 ```
-lib/
-├── main.dart                      # Bootstrap (runApp only)
-├── app/
-│   ├── app.dart                   # FinanceApp root widget
-│   └── app_shell.dart             # AppShell + bottom nav
-├── core/                          # Cross-cutting concerns
-│   ├── config/app_config.dart
-│   ├── constants/
-│   ├── error/error_handler.dart
-│   ├── theme/app_theme.dart
-│   └── utils/platform_helper.dart
-├── domain/                        # Pure business logic
-│   ├── entities/                  # Transaction, Budget
-│   ├── repositories/             # Abstract interfaces
-│   └── usecases/                 # Auth, Transaction, Budget
-├── data/                          # Implementation layer
-│   ├── models/                    # Transaction, Budget, Asset, Debt, etc.
-│   ├── datasources/
-│   │   ├── local/sqlite_helper.dart
-│   │   ├── remote/               # AI, OCR, Export, Midtrans, etc.
-│   │   ├── db_interface.dart
-│   │   ├── pb_helper.dart
-│   │   ├── smart_db_helper.dart
-│   │   └── sync_queue_helper.dart
-│   └── repositories/             # Repository implementations
-├── presentation/                  # Flutter UI layer
-│   ├── providers/                 # Auth, Budget, Theme, Transaction, Usage
-│   ├── screens/
-│   │   ├── auth/                  # Login, Splash
-│   │   ├── dashboard/
-│   │   ├── transaction/           # Add, History
-│   │   ├── budget/
-│   │   ├── report/
-│   │   ├── ai_chat/
-│   │   ├── export_import/
-│   │   ├── receipt/
-│   │   └── upgrade/               # Upgrade, PaymentWebview
-│   └── widgets/
-│       ├── budget/
-│       └── transaction/
-└── services/
-    └── pb_client.dart             # PocketBase client
+.
+├── lib/                           # Flutter app (Clean Architecture)
+│   ├── main.dart                  # Entry point
+│   ├── app/
+│   │   ├── app.dart               # FinanceApp root + MultiProvider
+│   │   ├── app_shell.dart         # Bottom nav shell
+│   │   └── index.dart
+│   ├── core/                      # Cross-cutting concerns
+│   │   ├── config/
+│   │   │   ├── app_config.dart
+│   │   │   └── app_config.dart.example
+│   │   ├── constants/             # colors, strings, categories, currencies, icons
+│   │   ├── error/
+│   │   │   ├── error_boundary.dart
+│   │   │   └── error_handler.dart
+│   │   ├── services/
+│   │   │   └── exchange_rate_service.dart
+│   │   ├── theme/app_theme.dart
+│   │   └── utils/                 # currency, platform helpers
+│   ├── domain/                    # Pure Dart — no Flutter/Groq deps
+│   │   ├── entities/              # Transaction, Budget, Asset, Debt, UserProfile, etc.
+│   │   ├── repositories/         # Abstract: Auth, Budget, Settings, Transaction
+│   │   └── usecases/             # Auth, Budget, Transaction use cases
+│   ├── data/                      # Implementation layer
+│   │   ├── models/                # Transaction, Budget, Asset, Debt, Payment, Usage, etc.
+│   │   ├── datasources/
+│   │   │   ├── local/sqlite_helper.dart
+│   │   │   ├── remote/           # AI, OCR, Export, Midtrans services
+│   │   │   ├── db_interface.dart
+│   │   │   ├── pb_helper.dart
+│   │   │   ├── smart_db_helper.dart
+│   │   │   └── sync_queue_helper.dart
+│   │   └── repositories/         # Impl: AuthRepositoryImpl, SettingsRepositoryImpl
+│   ├── presentation/              # Flutter UI layer
+│   │   ├── blocs/                 # Category, Settings, Usage BLoCs
+│   │   ├── providers/             # Auth, Budget, Theme, Transaction, Usage
+│   │   ├── screens/
+│   │   │   ├── ai_chat/
+│   │   │   ├── auth/             # Login, Splash
+│   │   │   ├── budget/
+│   │   │   ├── dashboard/
+│   │   │   ├── export_import/
+│   │   │   ├── receipt/
+│   │   │   ├── report/
+│   │   │   ├── settings/
+│   │   │   ├── transaction/      # Add, History
+│   │   │   └── upgrade/          # Premium, PaymentWebview
+│   │   └── widgets/              # Budget, Transaction shared widgets
+│   └── services/
+│       ├── local_oauth_server.dart
+│       ├── oauth_handler.dart
+│       └── pb_client.dart        # PocketBase singleton + Ngrok HTTP client
+├── pocketbase/                    # Backend — pre-built binary
+│   ├── pocketbase.exe
+│   ├── start_server.bat
+│   ├── pb_data/                  # SQLite db, storage, backups
+│   ├── pb_hooks/                 # Midtrans Snap hook
+│   └── pb_migrations/
+│       ├── pb_schema.json        # Collection definitions
+│       ├── pb_import.json
+│       └── *.js                  # JS migrations
+├── test/                         # Unit & widget tests
+│   ├── helpers/transaction_factory.dart
+│   ├── mocks/mock_db_helper.dart
+│   ├── providers/transaction_logic_test.dart
+│   └── widget_test.dart
+├── assets/
+│   ├── images/                   # Logo, icons
+│   └── tessdata/                 # Tesseract traineddata (ind, eng)
+├── scripts/
+│   └── generate_icons.js         # Icon generation script
+├── android/                      # Android platform
+├── ios/                          # iOS platform
+├── web/                          # Web platform
+├── .env / .env.example
+├── AGENTS.md
+└── pubspec.yaml
 ```
 
 ## Storage Layer
@@ -147,38 +182,14 @@ App Start → SmartDbHelper.initialize()
 
 ## Setup API Keys
 
-API keys TIDAK lagi disimpan di file `.env` yang dibundle ke app. 
-Ini untuk mencegah key terekspos di APK/IPA.
-
-### Cara Setup (Build Time)
-
-Gunakan `--dart-define` saat build atau run:
+API keys dikirim via `--dart-define` saat build/run agar tidak terekspos di APK/IPA.
 
 ```bash
-# Run (development)
-flutter run --dart-define=GROQ_API_KEY=your_groq_key_here
-
-# Build Android
-flutter build apk --dart-define=GROQ_API_KEY=your_groq_key_here
-
-# Build iOS
-flutter build ios --dart-define=GROQ_API_KEY=your_groq_key_here
+flutter run --dart-define=GROQ_API_KEY=gsk_xxx --dart-define=PB_BASE_URL=http://10.0.2.2:8090
+flutter build apk --release --dart-define=GROQ_API_KEY=gsk_xxx --dart-define=PB_BASE_URL=http://10.0.2.2:8090
 ```
 
-Untuk development lokal, bisa buat file `.env` (sudah di-gitignore):
-
-```
-GROQ_API_KEY=your_groq_key_here
-```
-
-###.env.example
-
-Copy `.env.example` ke `.env` untuk development lokal:
-
-```bash
-cp .env.example .env
-# Edit .env dengan key asli
-```
+Untuk development lokal, salin `.env.example` ke `.env` (sudah di-gitignore).
 
 ## AI Chat Integration
 
@@ -223,31 +234,24 @@ Mendukung bahasa Indonesia dengan auto-detect locale.
 
 ## Setup PocketBase
 
-### 1. Download & Run PocketBase
+PocketBase sudah tersedia sebagai pre-built binary di folder `pocketbase/`. Skema database didefinisikan di `pocketbase/pb_migrations/pb_schema.json`.
+
+### 1. Run PocketBase
 
 ```bash
-# Download dari https://pocketbase.io/docs/
-chmod +x pocketbase
-./pocketbase serve
+cd pocketbase
+.\pocketbase serve
 # Admin UI: http://127.0.0.1:8090/_/
 ```
 
-### 2. Cara 1 — Auto Migration (Recommended)
-
-```bash
-# Copy folder pb_migrations/ ke direktori PocketBase
-cp -r pb_migrations/ /path/to/pocketbase/
-./pocketbase migrate up
-```
-
-### 3. Cara 2 — Import via Admin UI
+### 2. Migrasi — Import via Admin UI (Recommended)
 
 1. Buka http://127.0.0.1:8090/_/
 2. Settings → Import Collections
-3. Upload file `pb_schema.json`
+3. Upload file `pocketbase/pb_migrations/pb_schema.json`
 4. Klik "Confirm and import"
 
-### 4. Update Flutter App
+### 3. Update Flutter App
 
 Edit file `.env` di root project Flutter:
 
@@ -257,10 +261,10 @@ PB_URL=http://127.0.0.1:8090
 
 Ganti IP jika PocketBase di server/hosting berbeda.
 
-### 5. Verify Setup
+### 4. Verify Setup
 
 Buka: http://127.0.0.1:8090/_/
-Pastikan collections `transactions` dan `categories` sudah muncul.
+Pastikan collections `transactions`, `assets`, `debts`, `budgets`, `midtrans_logs` sudah muncul.
 
 ## ⚡ Quick Start
 
@@ -276,7 +280,7 @@ Buka `.vscode/launch.json` dan sesuaikan:
 
 ### 2. Jalankan PocketBase
 ```bash
-cd C:\laragon\pocketbase
+cd pocketbase
 .\pocketbase serve
 ```
 
@@ -360,38 +364,25 @@ flutter build ios --release --dart-define=GROQ_API_KEY=your_groq_key_here
 
 ## Configuration
 
-### API Keys
-
-API keys sekarang Passed via `--dart-define` saat build time:
-
-```bash
-flutter run --dart-define=GROQ_API_KEY=gsk_xxxxxxxxxx
-```
-
-Lihat section **Setup API Keys** untuk detail lengkap.
-
 ### PocketBase (Primary Storage)
 
-PocketBase sekarang adalah **PRIMARY storage**. Jika server reachable, app akan otomatis menggunakan PocketBase dan menyimpan cache ke SQLite. Jika server offline, app fallback ke SQLite dan queue perubahan untuk sync otomatis.
+PocketBase adalah **PRIMARY storage**. Jika server reachable, app otomatis menggunakan PocketBase dan menyimpan cache ke SQLite. Jika server offline, app fallback ke SQLite dan queue perubahan untuk sync otomatis.
+
+Skema tersimpan di `pocketbase/pb_migrations/pb_schema.json` — import via Admin UI > Settings > Import Collections.
 
 ```bash
-# Run PocketBase server
-./pocketbase serve
+cd pocketbase
+.\pocketbase serve
 
 # Default URL dikonfigurasi di lib/config/app_config.dart
 # Android emulator: http://10.0.2.2:8090
 # iOS simulator: http://127.0.0.1:8090
-# Ngrok tunnel: https://equator-untainted-stank.ngrok-free.dev
 ```
 
 ### Midtrans Payment
 
-Payment menggunakan PocketBase hook (server-side). 
-Pastikan:
-
-1. PocketBase server berjalan
-2. Hook `pb_hooks/create_snap_token.pb.js` sudah di-register
-3. Environment variable `MIDTRANS_SERVER_KEY` dan `MIDTRANS_BASE_URL` sudah diset di server
+Payment via PocketBase hook (`pb_hooks/create_snap_token.pb.js`).
+Set environment `MIDTRANS_SERVER_KEY` di server sebelum menjalankan PocketBase.
 
 ## 🖼️ Generasi Ikon Aplikasi
 
